@@ -41,10 +41,8 @@ set_target_properties(beauty
 target_compile_definitions(beauty
     PRIVATE
         BOOST_ALL_DYN_LINK
-        BEAUTY_EXPORTS
         LINUX
         UNIX
-        _FORTIFY_SOURCE=2
 )
 
 target_include_directories(beauty
