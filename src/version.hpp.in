@@ -1,0 +1,3 @@
+#pragma once
+
+#define BEAUTY_PROJECT_VERSION "${VERSION}"
