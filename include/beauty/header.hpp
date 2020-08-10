@@ -4,7 +4,9 @@ namespace beauty::header
 {
     struct content_type {
         content_type(const char* v) : value(v) {}
-        const char* value = "";
+        std::string value;
+
+        std::string operator()(const std::string&) { return value; }
     };
 }
 

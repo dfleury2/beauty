@@ -19,11 +19,14 @@ class acceptor : public std::enable_shared_from_this<acceptor>
 {
 public:
     acceptor(application& app,
-        asio::ip::tcp::endpoint endpoint,
+        asio::ip::tcp::endpoint& endpoint,
         const beauty::router& router);
+
+    ~acceptor();
 
     // Start accepting incoming connections
     void run();
+    void stop();
 
     void do_accept();
     void on_accept(boost::system::error_code ec);

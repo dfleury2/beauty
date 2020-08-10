@@ -20,11 +20,10 @@ int main(int argc, char* argv[])
 
     beauty::application app(threads);
 
+    asio::ip::tcp::endpoint ep{address, port};
+
     // Create and launch a listening port
-    std::make_shared<beauty::acceptor>(
-        app,
-        asio::ip::tcp::endpoint{address, port},
-        router)->run();
+    std::make_shared<beauty::acceptor>(app, ep, router)->run();
 
     app.run();
 

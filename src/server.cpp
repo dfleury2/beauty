@@ -17,21 +17,22 @@ server::server(certificates&& c, int concurrency) :
 {}
 
 // --------------------------------------------------------------------------
+server::~server()
+{
+    stop();
+}
+
+// --------------------------------------------------------------------------
 server&
 server::listen(int port, const char* address)
 {
     auto ip_address = asio::ip::make_address(address);
 
-    auto end_point = asio::ip::tcp::endpoint{
-        ip_address,
-        static_cast<unsigned short>(port)
-    };
+    _endpoint = asio::ip::tcp::endpoint{ip_address, (unsigned short)port};
 
     // Create and launch a listening port
-    std::make_shared<beauty::acceptor>(
-        _app,
-        end_point,
-        _router)->run();
+    _acceptor = std::make_shared<beauty::acceptor>(_app, _endpoint, _router);
+    _acceptor->run();
 
     return *this;
 }
@@ -41,6 +42,16 @@ void
 server::run()
 {
     _app.ioc().run();
+}
+
+
+// --------------------------------------------------------------------------
+void
+server::stop()
+{
+    if (_acceptor) {
+        _acceptor->stop();
+    }
 }
 
 // --------------------------------------------------------------------------

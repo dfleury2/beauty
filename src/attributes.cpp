@@ -1,6 +1,5 @@
 #include <beauty/attributes.hpp>
-
-#include "utils.hpp"
+#include <beauty/utils.hpp>
 
 namespace beauty
 {
@@ -26,8 +25,6 @@ attributes::insert(std::string key, std::string value)
 const std::string&
 attributes::operator[](const std::string& key) const
 {
-    static const std::string EMPTY;
-
     auto found_key = _attributes.find(key);
     if (found_key != _attributes.end()) {
         return found_key->second;

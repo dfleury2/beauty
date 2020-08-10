@@ -42,7 +42,7 @@ application::application(int concurrency) :
     _ioc(concurrency),
     _work(asio::make_work_guard(_ioc)),
     _ssl_context(asio::ssl::context::sslv23),
-    _threads(concurrency)
+    _threads(std::max(1, concurrency))
 {}
 
 // --------------------------------------------------------------------------
@@ -51,7 +51,7 @@ application::application(certificates&& c, int concurrency) :
     _work(asio::make_work_guard(_ioc)),
     _ssl_context(asio::ssl::context::sslv23),
     _certificates(std::move(c)),
-    _threads(concurrency)
+    _threads(std::max(1, concurrency))
 {
     load_server_certificates();
 }
@@ -66,7 +66,10 @@ application::~application()
 void
 application::run()
 {
-    std::cout << "Starting beauty application - " << _threads.size() << " thread(s)." << std::endl;
+    // Prevent to run twice
+    if (is_running()) {
+        return;
+    }
 
     // Run the I/O service on the requested number of threads
     for(auto& t : _threads) {
@@ -77,10 +80,16 @@ application::run()
 }
 
 // --------------------------------------------------------------------------
+bool
+application::is_running() const
+{
+    return _threads[0].joinable();
+}
+
+// --------------------------------------------------------------------------
 void
 application::stop()
 {
-    std::cout << "Waiting to stop beauty application threads..." << std::endl;
     _ioc.stop();
 
     for(auto&& t : _threads) {
@@ -88,9 +97,9 @@ application::stop()
             t.join();
         }
     }
-    _ioc.restart();
 
-    std::cout << "Beauty application stopped." << std::endl;
+    // Prepare for the next start
+    _ioc.restart();
 }
 
 // --------------------------------------------------------------------------
@@ -130,9 +139,11 @@ application::load_server_certificates()
 
 // --------------------------------------------------------------------------
 void
-run()
+run(int concurrency)
 {
-    application::Instance().run();
+    application::Instance(concurrency).run();
+    // May be, may be not...
+    // application::Instance(concurrency).ioc().run();
 }
 
 // --------------------------------------------------------------------------
@@ -140,6 +151,12 @@ void
 stop()
 {
     application::Instance().stop();
+}
+
+// --------------------------------------------------------------------------
+bool is_running()
+{
+    return application::Instance().is_running();
 }
 
 }

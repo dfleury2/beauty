@@ -22,9 +22,9 @@ public:
 
     bool match(beauty::request& req) const noexcept;
 
-    void execute(const beauty::request& req, beauty::response& res) const;
-
-    friend std::ostream& operator<<(std::ostream& os, const route& r);
+    void execute(const beauty::request& req, beauty::response& res) const {
+        _cb(req, res);
+    }
 
 private:
     std::vector<std::string> _segments;

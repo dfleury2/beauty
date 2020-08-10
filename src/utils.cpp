@@ -1,7 +1,7 @@
-#include "utils.hpp"
+#include <beauty/utils.hpp>
 
 #include <beauty/header.hpp>
-#include "version.hpp"
+#include <beauty/version.hpp>
 
 #include <iostream>
 
@@ -24,6 +24,9 @@ split(const T& str, char sep)
         columns.push_back(std::string_view(&str[begin], end - begin));
         begin = end + 1;
     }
+    if (str.empty() || *str.rbegin() == sep)
+        columns.push_back(std::string_view(&str[begin], 0));
+
     return columns;
 }
 
@@ -32,41 +35,38 @@ split(const T& str, char sep)
 namespace beauty {
 
 //---------------------------------------------------------------------------
-response
-bad_request(request& req, const char* message)
+std::shared_ptr<response>
+bad_request(const request& req, const char* message)
 {
-    response res{http::status::bad_request, req.version()};
-    res.set(http::field::server, BEAUTY_PROJECT_VERSION);
-    res.set(content_type::text_plain);
-    res.keep_alive(req.keep_alive());
-    res.body() = std::string(message);
-    res.prepare_payload();
+    auto res = std::make_shared<response>(http::status::bad_request, req.version());
+    res->set(http::field::server, BEAUTY_PROJECT_VERSION);
+    res->set(content_type::text_plain);
+    res->keep_alive(req.keep_alive());
+    res->body() = std::string(message);
     return res;
 }
 
 //---------------------------------------------------------------------------
-response
-not_found(request& req)
+std::shared_ptr<response>
+not_found(const request& req)
 {
-    response res{http::status::not_found, req.version()};
-    res.set(http::field::server, BEAUTY_PROJECT_VERSION);
-    res.set(content_type::text_plain);
-    res.keep_alive(req.keep_alive());
-    res.body() = "The resource '" + req.target().to_string() + "' was not found.";
-    res.prepare_payload();
+    auto res = std::make_shared<response>(http::status::not_found, req.version());
+    res->set(http::field::server, BEAUTY_PROJECT_VERSION);
+    res->set(content_type::text_plain);
+    res->keep_alive(req.keep_alive());
+    res->body() = "The resource '" + req.target().to_string() + "' was not found.";
     return res;
 }
 
 //---------------------------------------------------------------------------
-response
-server_error(request& req, const char* message)
+std::shared_ptr<response>
+server_error(const request& req, const char* message)
 {
-    response res{http::status::internal_server_error, req.version()};
-    res.set(http::field::server, BEAUTY_PROJECT_VERSION);
-    res.set(content_type::text_plain);
-    res.keep_alive(req.keep_alive());
-    res.body() = std::string("An error occurred: '") + message + "'";
-    res.prepare_payload();
+    auto res = std::make_shared<response>(http::status::internal_server_error, req.version());
+    res->set(http::field::server, BEAUTY_PROJECT_VERSION);
+    res->set(content_type::text_plain);
+    res->keep_alive(req.keep_alive());
+    res->body() = std::string("An error occurred: '") + message + "'";
     return res;
 };
 

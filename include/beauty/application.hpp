@@ -22,6 +22,8 @@ public:
     ~application();
 
     void run();
+    bool is_running() const;
+
     void stop();
 
     asio::io_context& ioc() { return _ioc; }
@@ -46,7 +48,8 @@ private:
 // --------------------------------------------------------------------------
 // Singleton direct access
 // --------------------------------------------------------------------------
-void run();
+void run(int concurrency = 1);
 void stop();
+bool is_running();
 
 }

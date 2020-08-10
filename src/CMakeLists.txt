@@ -1,26 +1,32 @@
 add_library(beauty
-    ../include/beauty/application.hpp
-    ../include/beauty/route.hpp
-    ../include/beauty/attributes.hpp
-    ../include/beauty/server.hpp
-    ../include/beauty/beauty.hpp
     ../include/beauty/acceptor.hpp
-    ../include/beauty/request.hpp
-    ../include/beauty/router.hpp
-    ../include/beauty/response.hpp
-    ../include/beauty/session.hpp
-    ../include/beauty/ssl_session.hpp
+    ../include/beauty/application.hpp
+    ../include/beauty/attributes.hpp
+    ../include/beauty/beauty.hpp
     ../include/beauty/certificate.hpp
-    ./attributes.cpp
-    ./application.cpp
-    ./route.cpp
-    ./utils.hpp
-    ./utils.cpp
-    ./server.cpp
-    ./session.cpp
-    ./ssl_session.cpp
-    ./router.cpp
+    ../include/beauty/client.hpp
+    ../include/beauty/header.hpp
+    ../include/beauty/request.hpp
+    ../include/beauty/response.hpp
+    ../include/beauty/route.hpp
+    ../include/beauty/router.hpp
+    ../include/beauty/server.hpp
+    ../include/beauty/acceptor.hpp
+    ../include/beauty/session.hpp
+    ../include/beauty/signal.hpp
+    ../include/beauty/timer.hpp
+    ../include/beauty/url.hpp
+    ../include/beauty/utils.hpp
     ./acceptor.cpp
+    ./application.cpp
+    ./attributes.cpp
+    ./client.cpp
+    ./route.cpp
+    ./server.cpp
+    ./signal.cpp
+    ./timer.cpp
+    ./url.cpp
+    ./utils.cpp
 )
 
 add_library(beauty::beauty ALIAS beauty)
@@ -59,7 +65,7 @@ target_link_libraries(beauty
         Threads::Threads
 )
 
-configure_file(./version.hpp.in ./version.hpp)
+configure_file(./version.hpp.in ./beauty/version.hpp)
 
 install(
     DIRECTORY ${PROJECT_SOURCE_DIR}/include

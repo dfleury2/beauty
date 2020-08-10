@@ -1,16 +1,14 @@
 #include <beauty/acceptor.hpp>
 
 #include <beauty/session.hpp>
-#include <beauty/ssl_session.hpp>
-
-#include "utils.hpp"
+#include <beauty/utils.hpp>
 
 namespace beauty {
 
 //---------------------------------------------------------------------------
 acceptor::acceptor(
     application& app,
-    asio::ip::tcp::endpoint endpoint,
+    asio::ip::tcp::endpoint& endpoint,
     const beauty::router& router) :
             _app(app),
             _acceptor(app.ioc()),
@@ -40,6 +38,9 @@ acceptor::acceptor(
         return;
     }
 
+    // Update server endpoint in case of dynamic port allocation
+    endpoint.port(_acceptor.local_endpoint().port());
+
     // Start listening for connections
     _acceptor.listen(asio::socket_base::max_listen_connections, ec);
     if (ec) {
@@ -49,8 +50,15 @@ acceptor::acceptor(
 }
 
 //---------------------------------------------------------------------------
+acceptor::~acceptor()
+{
+    stop();
+}
+
+//---------------------------------------------------------------------------
 void
-acceptor::run() {
+acceptor::run()
+{
     if(! _acceptor.is_open()) {
         return;
     }
@@ -59,7 +67,17 @@ acceptor::run() {
 
 //---------------------------------------------------------------------------
 void
-acceptor::do_accept() {
+acceptor::stop()
+{
+    if (_acceptor.is_open()) {
+        _acceptor.close();
+    }
+}
+
+//---------------------------------------------------------------------------
+void
+acceptor::do_accept()
+{
     _acceptor.async_accept(
         _socket,
         [me = shared_from_this()](auto ec) {
@@ -69,16 +87,21 @@ acceptor::do_accept() {
 
 //---------------------------------------------------------------------------
 void
-acceptor::on_accept(boost::system::error_code ec) {
+acceptor::on_accept(boost::system::error_code ec)
+{
+    if (ec == boost::system::errc::operation_canceled) {
+        return; // Nothing to do anymore
+    }
+
     if (ec) {
         fail(ec, "accept");
     }
     else {
         // Create the session SLL or not and run it
         if (_app.is_ssl_activated()) {
-            std::make_shared<ssl_session>(std::move(_socket), _app.ssl_context(), _router)->run();
+            std::make_shared<session_https>(std::move(_socket), _router, _app.ssl_context())->run();
         } else {
-            std::make_shared<session>(std::move(_socket), _router)->run();
+            std::make_shared<session_http>(std::move(_socket), _router)->run();
         }
     }
 

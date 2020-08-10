@@ -21,11 +21,10 @@ int main(int argc, char* argv[])
     auto& app = beauty::application::Instance(threads);
     beauty::router router;
 
+    asio::ip::tcp::endpoint ep{address, port};
+
     // Create and launch a listening port
-    std::make_shared<beauty::acceptor>(
-        app,
-        asio::ip::tcp::endpoint{address, port},
-        router)->run();
+    std::make_shared<beauty::acceptor>(app, ep, router)->run();
 
     std::cout << "Waiting a bit" << std::flush;
 

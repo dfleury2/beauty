@@ -1,6 +1,5 @@
 #include <beauty/route.hpp>
-
-#include "utils.hpp"
+#include <beauty/utils.hpp>
 
 namespace beauty
 {
@@ -46,22 +45,5 @@ route::match(beauty::request& req) const noexcept
     return true;
 }
 
-// --------------------------------------------------------------------------
-void
-route::execute(const beauty::request& req, beauty::response& res) const
-{
-    _cb(req, res);
-}
-
-// --------------------------------------------------------------------------
-std::ostream& operator<<(std::ostream& os, const route& r)
-{
-    os << "Path ";
-    for(auto&& s : r._segments) {
-        os << "[" << s << "]";
-    }
-
-    return os;
-}
 
 }

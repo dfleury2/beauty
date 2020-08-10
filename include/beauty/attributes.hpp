@@ -18,6 +18,8 @@ public:
 
 private:
     std::unordered_map<std::string, std::string> _attributes;
+
+    inline static const std::string EMPTY;
 };
 
 }

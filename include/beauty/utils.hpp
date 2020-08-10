@@ -14,20 +14,20 @@ namespace beauty {
 //---------------------------------------------------------------------------
 // Returns a bad request response
 //---------------------------------------------------------------------------
-response
-bad_request(beauty::request& req, const char* message);
+std::shared_ptr<response>
+bad_request(const beauty::request& req, const char* message);
 
 //---------------------------------------------------------------------------
 // Returns a not found response
 //---------------------------------------------------------------------------
-response
-not_found(beauty::request& req);
+std::shared_ptr<response>
+not_found(const beauty::request& req);
 
 //---------------------------------------------------------------------------
 // Returns a server error response
 //---------------------------------------------------------------------------
-response
-server_error(beauty::request& req, const char* what);
+std::shared_ptr<response>
+server_error(const beauty::request& req, const char* what);
 
 //---------------------------------------------------------------------------
 // Report a failure
