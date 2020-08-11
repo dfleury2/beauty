@@ -10,20 +10,55 @@ namespace beauty
 // --------------------------------------------------------------------------
 class session_client : public std::enable_shared_from_this<session_client>
 {
+private:
+    // Store all informations mandatory to be asynchronous
+    struct request_context {
+        request_context(asio::io_context& ioc) :
+            timer(ioc)
+        {}
+        asio::steady_timer      timer;
+        bool                    too_late{false};
+
+        beast::flat_buffer      buffer;
+        beauty::request         request;
+        beauty::response        response;
+
+        client::client_cb       cb;
+
+        static
+        std::shared_ptr<request_context> Create(asio::io_context& ioc, beauty::request&& req,
+                const beauty::url& url, const beauty::duration& d, std::optional<client::client_cb> cb = {}) {
+
+            // Create a request context to pass on each callback
+            auto req_ctx = std::make_shared<request_context>(ioc);
+
+            // Set up an HTTP GET request message
+            req_ctx->request = std::move(req);
+            req_ctx->request.version(11);
+            req_ctx->request.target(std::string(url.path()) + std::string(url.query()));
+            req_ctx->request.set(beast::http::field::host, url.host());
+            req_ctx->request.set(beast::http::field::user_agent, BEAUTY_PROJECT_VERSION);
+            req_ctx->request.prepare_payload();
+
+            if (cb) {
+                req_ctx->cb = std::move(*cb);
+            }
+
+            if (d.count()) {
+                req_ctx->timer.expires_after(d);
+            }
+
+            return req_ctx;
+        }
+    };
+
 public:
     explicit
     session_client(asio::io_context& ioc) :
         _ioc(ioc),
         _resolver(_ioc),
-        _socket(_ioc),
-        _timer(_ioc)
+        _socket(_ioc)
     {}
-
-    session_client(asio::io_context& ioc, client::client_cb&& cb) :
-        session_client(ioc)
-    {
-        _cb = std::move(cb);
-    }
 
     ~session_client() {
         // Gracefully close the socket
@@ -31,32 +66,41 @@ public:
         _socket.shutdown(asio::ip::tcp::socket::shutdown_both, ec);
     }
 
-    // Start the asynchronous operation
     void run(beauty::request&& req, const beauty::url& url, const beauty::duration& d)
     {
-        // Set up an HTTP GET request message
-        _request = std::move(req);
-        _request.version(11);
-        _request.target(std::string(url.path()) + std::string(url.query()));
-        _request.set(beast::http::field::host, url.host());
-        _request.set(beast::http::field::user_agent, BEAUTY_PROJECT_VERSION);
-        _request.prepare_payload();
+        // Create a request context to pass on each callback
+        auto req_ctx = request_context::Create(_ioc, std::move(req), url, d);
 
-        if (d.count()) {
-            _timer.expires_after(d);
+        run(req_ctx, url);
+    }
 
-            _timer.async_wait(
-                [me = shared_from_this()](const boost::system::error_code& ec) {
-                    me->on_timer(ec);
+    // Start the asynchronous request
+    void run(beauty::request&& req, const beauty::url& url, const beauty::duration& d,
+            client::client_cb&& cb)
+    {
+        // Create a request context to pass on each callback
+        auto req_ctx = request_context::Create(_ioc, std::move(req), url, d, std::move(cb));
+
+        run(req_ctx, url);
+    }
+
+    // Start the asynchronous request
+    void run(std::shared_ptr<request_context> req_ctx, const beauty::url& url)
+    {
+        if (req_ctx->timer.expiry() != asio::steady_timer::time_point()) {
+            req_ctx->timer.async_wait(
+                [me = shared_from_this(), req_ctx](const boost::system::error_code& ec) {
+                    me->on_timer(ec, req_ctx);
                 });
         }
 
+
         if (_socket.is_open()) {
             // Send the HTTP request to the remote host
-            beast::http::async_write(_socket, _request,
-                    [me = shared_from_this()](boost::system::error_code ec,
+            beast::http::async_write(_socket, req_ctx->request,
+                    [me = shared_from_this(), req_ctx](boost::system::error_code ec,
                             std::size_t bytes_transferred) {
-                me->on_write(ec, bytes_transferred);
+                me->on_write(ec, bytes_transferred, req_ctx);
             });
         }
         else {
@@ -64,17 +108,19 @@ public:
             _resolver.async_resolve(
                 url.host(),
                 url.port(),
-                [me = shared_from_this()](const boost::system::error_code& ec,
+                [me = shared_from_this(), req_ctx](const boost::system::error_code& ec,
                         asio::ip::tcp::resolver::results_type results) {
-                    me->on_resolve(ec, results);
+                    me->on_resolve(ec, results, req_ctx);
                 });
         }
     }
 
-    void on_resolve(const boost::system::error_code& ec, asio::ip::tcp::resolver::results_type results)
+    void on_resolve(const boost::system::error_code& ec,
+            asio::ip::tcp::resolver::results_type results,
+            std::shared_ptr<request_context> req_ctx)
     {
         if(ec) {
-            return fail(ec, "resolve");
+            return fail(*req_ctx, ec, "resolve");
         }
 
         // Make the connection on the IP address we get from a lookup
@@ -82,66 +128,74 @@ public:
             _socket,
             results.begin(),
             results.end(),
-            [me = shared_from_this()](const boost::system::error_code& ec,
+            [me = shared_from_this(), req_ctx](const boost::system::error_code& ec,
                     asio::ip::tcp::resolver::iterator it) {
-                me->on_connect(ec);
+                me->on_connect(ec, req_ctx);
             }
         );
     }
 
     void
-    on_connect(const boost::system::error_code& ec)
+    on_connect(const boost::system::error_code& ec,
+            std::shared_ptr<request_context> req_ctx)
     {
         if(ec) {
-            return fail(ec, "connect");
+            return fail(*req_ctx, ec, "connect");
         }
 
         // Send the HTTP request to the remote host
-        beast::http::async_write(_socket, _request,
-                [me = shared_from_this()](boost::system::error_code ec,
+        beast::http::async_write(_socket, req_ctx->request,
+                [me = shared_from_this(), req_ctx](boost::system::error_code ec,
                         std::size_t bytes_transferred) {
-            me->on_write(ec, bytes_transferred);
+            me->on_write(ec, bytes_transferred, req_ctx);
         });
     }
 
-    void on_write(boost::system::error_code ec, std::size_t)
+    void on_write(boost::system::error_code ec, std::size_t,
+            std::shared_ptr<request_context> req_ctx)
     {
         if(ec) {
-            return fail(ec, "write");
+            return fail(*req_ctx, ec, "write");
         }
 
         // Clear the response
-        _response = {};
+        req_ctx->response = {};
 
         // Receive the HTTP response
-        beast::http::async_read(_socket, _buffer, _response,
-                [me = shared_from_this()](boost::system::error_code ec,
+        beast::http::async_read(_socket, req_ctx->buffer, req_ctx->response,
+                [me = shared_from_this(), req_ctx](boost::system::error_code ec,
                         std::size_t bytes_transferred) {
-            me->on_read(ec);
+            me->on_read(ec, req_ctx);
         });
     }
 
-    void on_read(boost::system::error_code ec)
+    void on_read(boost::system::error_code ec,
+            std::shared_ptr<request_context> req_ctx)
     {
         if(ec) {
-            return fail(ec, "read");
+            return fail(*req_ctx, ec, "read");
         }
 
-        _timer.cancel(); // will call on_timer with operator_cancelled
+        req_ctx->timer.cancel(); // will call on_timer with operator_cancelled
 
-        if (_cb && !_too_late) {
-            _cb(ec, std::move(_response));
+        if (req_ctx->cb) {
+            if (!req_ctx->too_late) {
+                req_ctx->cb(ec, std::move(req_ctx->response));
+            }
+        } else {
+            _response = std::move(req_ctx->response);
         }
     }
 
-    void on_timer(boost::system::error_code ec)
+    void on_timer(boost::system::error_code ec,
+            std::shared_ptr<request_context> req_ctx)
     {
-        if (!ec && !_too_late) {
-            fail(boost::system::error_code(boost::system::errc::timed_out,
+        if (!ec && !req_ctx->too_late) {
+            fail(*req_ctx, boost::system::error_code(boost::system::errc::timed_out,
                     boost::system::system_category()),
                     "timeout");
 
-            _too_late = true;
+            req_ctx->too_late = true;
         }
     }
 
@@ -151,21 +205,16 @@ private:
     asio::io_context&       _ioc;
     asio::ip::tcp::resolver _resolver;
     asio::ip::tcp::socket   _socket;
-    asio::steady_timer      _timer;
-    bool                    _too_late{false};
 
-    beast::flat_buffer      _buffer;
-    beauty::request         _request;
+    // Synchronous response
     beauty::response        _response;
 
-    client::client_cb   _cb;
-
 private:
-    void fail(boost::system::error_code ec, const char* msg /* not used */) {
-        if (_cb) {
+    void fail(const request_context& req_ctx, boost::system::error_code ec, const char* msg /* not used */) {
+        if (req_ctx.cb) {
             //std::cout << " !!! FAILED !!! " << ec << " with " << msg << std::endl;
-            if (!_too_late) {
-                _cb(ec, {});
+            if (!req_ctx.too_late) {
+                req_ctx.cb(ec, {});
             }
         } else {
             throw boost::system::system_error(ec);
@@ -307,20 +356,24 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
 {
     try {
         _url = beauty::url(url);
-    } catch(const std::exception& ex) {
+
+        if (!_session) {
+            // Create the session on first call...
+            _session = std::make_shared<session_client>(
+                    beauty::application::Instance().ioc());
+        }
+
+        _session->run(std::move(req), _url, d, std::move(cb));
+    }
+    catch(const boost::system::system_error& ex) {
+        cb(ex.code(), {});
+    }
+    catch(const std::exception& ex) {
         cb(boost::system::error_code(boost::system::errc::bad_address,
                 boost::system::system_category()), {});
         return;
     }
 
-    if (!_session) {
-        // Create the session on first call...
-        _session = std::make_shared<session_client>(
-                beauty::application::Instance().ioc(),
-                std::move(cb));
-    }
-
-    _session->run(std::move(req), _url, d);
 }
 
 }

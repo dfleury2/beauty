@@ -160,12 +160,14 @@ public:
         }
 
         // Read another request
+        //std::cout << "Read another request" << std::endl;
         // Allow to stay alive the session in case of posponed response
         do_read();
     }
 
     void do_close()
     {
+        //std::cout << "Shutdown the connecion" << std::endl;
         if constexpr(SSL) {
             // Perform the SSL shutdown
             _stream.async_shutdown(
