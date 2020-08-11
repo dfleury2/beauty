@@ -2,6 +2,9 @@
 
 #include <boost/system/error_code.hpp>
 
+#include <list>
+#include <atomic>
+
 namespace beauty
 {
 
@@ -57,7 +60,8 @@ public:
     session_client(asio::io_context& ioc) :
         _ioc(ioc),
         _resolver(_ioc),
-        _socket(_ioc)
+        _socket(_ioc),
+        _strand(_socket.get_executor())
     {}
 
     ~session_client() {
@@ -94,33 +98,42 @@ public:
                 });
         }
 
+        std::lock_guard guard{_requests_mtx};
+        bool connection_required = (_requests.empty() && !_socket.is_open());
+        //std::cout << "Start a request" << std::endl;
+        _requests.push_back(req_ctx);
 
-        if (_socket.is_open()) {
-            // Send the HTTP request to the remote host
-            beast::http::async_write(_socket, req_ctx->request,
-                    [me = shared_from_this(), req_ctx](boost::system::error_code ec,
-                            std::size_t bytes_transferred) {
-                me->on_write(ec, bytes_transferred, req_ctx);
-            });
-        }
-        else {
+        if (connection_required) {
+            //std::cout << "Try to resolve the host" << std::endl;
+
+            _pending_request = true;
+
             // Look up the domain name
             _resolver.async_resolve(
                 url.host(),
                 url.port(),
-                [me = shared_from_this(), req_ctx](const boost::system::error_code& ec,
+                [me = shared_from_this()](const boost::system::error_code& ec,
                         asio::ip::tcp::resolver::results_type results) {
-                    me->on_resolve(ec, results, req_ctx);
+                    me->on_resolve(ec, results);
                 });
         }
+
+        if (!_pending_request) {
+            //std::cout << "should do something to rearm" << std::endl;
+            do_write();
+        } else {
+            //std::cout << "nothing to do to rearm" << std::endl;
+        }
+
     }
 
     void on_resolve(const boost::system::error_code& ec,
-            asio::ip::tcp::resolver::results_type results,
-            std::shared_ptr<request_context> req_ctx)
+            asio::ip::tcp::resolver::results_type results)
     {
+        //std::cout << "on resolve" << std::endl;
         if(ec) {
-            return fail(*req_ctx, ec, "resolve");
+            std::lock_guard guard{_requests_mtx};
+            return fail(**_requests.begin(), ec, "resolve");
         }
 
         // Make the connection on the IP address we get from a lookup
@@ -128,50 +141,77 @@ public:
             _socket,
             results.begin(),
             results.end(),
-            [me = shared_from_this(), req_ctx](const boost::system::error_code& ec,
+            [me = shared_from_this()](const boost::system::error_code& ec,
                     asio::ip::tcp::resolver::iterator it) {
-                me->on_connect(ec, req_ctx);
+                me->on_connect(ec);
             }
         );
     }
 
     void
-    on_connect(const boost::system::error_code& ec,
-            std::shared_ptr<request_context> req_ctx)
+    on_connect(const boost::system::error_code& ec)
     {
+        //std::cout << "on connect" << std::endl;
         if(ec) {
-            return fail(*req_ctx, ec, "connect");
+            std::lock_guard guard{_requests_mtx};
+            return fail(**_requests.begin(), ec, "connect");
         }
 
-        // Send the HTTP request to the remote host
-        beast::http::async_write(_socket, req_ctx->request,
-                [me = shared_from_this(), req_ctx](boost::system::error_code ec,
-                        std::size_t bytes_transferred) {
-            me->on_write(ec, bytes_transferred, req_ctx);
-        });
+        std::lock_guard guard{_requests_mtx};
+        do_write();
     }
 
-    void on_write(boost::system::error_code ec, std::size_t,
+    void
+    do_write() {
+        //std::cout << "do write" << std::endl;
+
+        if (_requests.empty()) {
+            //std::cout << " ... nothing to do" << std::endl;
+            _pending_request = false;
+            return;
+        }
+
+        auto req_ctx = *_requests.begin();
+       _requests.pop_front();
+
+       _pending_request = true;
+
+       // Send the HTTP request to the remote host
+        beast::http::async_write(_socket, req_ctx->request,
+            asio::bind_executor(_strand,
+                [me = shared_from_this(), req_ctx](boost::system::error_code ec,
+                        std::size_t bytes_transferred) {
+                    me->on_write(ec, bytes_transferred, req_ctx);
+                })
+        );
+    }
+
+    void
+    on_write(boost::system::error_code ec, std::size_t,
             std::shared_ptr<request_context> req_ctx)
     {
+        //std::cout << "on write" << std::endl;
         if(ec) {
             return fail(*req_ctx, ec, "write");
         }
 
         // Clear the response
-        req_ctx->response = {};
+        _response = {};
 
         // Receive the HTTP response
         beast::http::async_read(_socket, req_ctx->buffer, req_ctx->response,
-                [me = shared_from_this(), req_ctx](boost::system::error_code ec,
-                        std::size_t bytes_transferred) {
-            me->on_read(ec, req_ctx);
-        });
+                asio::bind_executor(_strand,
+                    [me = shared_from_this(), req_ctx](boost::system::error_code ec,
+                            std::size_t bytes_transferred) {
+                me->on_read(ec, req_ctx);
+            })
+        );
     }
 
     void on_read(boost::system::error_code ec,
             std::shared_ptr<request_context> req_ctx)
     {
+        //std::cout << "on read" << std::endl;
         if(ec) {
             return fail(*req_ctx, ec, "read");
         }
@@ -185,6 +225,9 @@ public:
         } else {
             _response = std::move(req_ctx->response);
         }
+
+        std::lock_guard guard{_requests_mtx};
+        do_write();
     }
 
     void on_timer(boost::system::error_code ec,
@@ -205,9 +248,15 @@ private:
     asio::io_context&       _ioc;
     asio::ip::tcp::resolver _resolver;
     asio::ip::tcp::socket   _socket;
+    asio::strand<asio::io_context::executor_type> _strand;
 
     // Synchronous response
     beauty::response        _response;
+
+    // Asynchronous request - wait for connection
+    std::mutex              _requests_mtx;
+    std::list<std::shared_ptr<request_context>> _requests;
+    std::atomic_bool        _pending_request{false};
 
 private:
     void fail(const request_context& req_ctx, boost::system::error_code ec, const char* msg /* not used */) {

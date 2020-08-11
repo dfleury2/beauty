@@ -48,13 +48,18 @@ int main(int argc, char* argv[])
                     }
                 }
             });
+//            if (i == 0) {
+//                // Add a small wait to block the processing - bug fixed
+//                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+//            }
         }
     });
 
     thr.join();
 
     while(success + failure < count) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        std::cout << (success + failure) << " response(s) received" << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 
     std::cout << (success + failure) << " response(s) received" << std::endl;
