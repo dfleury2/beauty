@@ -25,16 +25,10 @@ public:
         _cb = std::move(cb);
     }
 
-    ~session_client()
-    {
+    ~session_client() {
         // Gracefully close the socket
         boost::system::error_code ec;
         _socket.shutdown(asio::ip::tcp::socket::shutdown_both, ec);
-
-//        // not_connected happens sometimes so don't bother reporting it.
-//        if(ec && ec != boost::system::errc::not_connected) {
-//            return fail(ec, "shutdown");
-//        }
     }
 
     // Start the asynchronous operation
@@ -58,8 +52,6 @@ public:
         }
 
         if (_socket.is_open()) {
-            std::cout << "Reuse opened socket" << std::endl;
-
             // Send the HTTP request to the remote host
             beast::http::async_write(_socket, _request,
                     [me = shared_from_this()](boost::system::error_code ec,
@@ -114,7 +106,6 @@ public:
 
     void on_write(boost::system::error_code ec, std::size_t)
     {
-        std::cout << "on write" << std::endl;
         if(ec) {
             return fail(ec, "write");
         }
@@ -138,14 +129,6 @@ public:
 
         _timer.cancel(); // will call on_timer with operator_cancelled
 
-//        // Gracefully close the socket
-//        _socket.shutdown(asio::ip::tcp::socket::shutdown_both, ec);
-//
-//        // not_connected happens sometimes so don't bother reporting it.
-//        if(ec && ec != boost::system::errc::not_connected) {
-//            return fail(ec, "shutdown");
-//        }
-
         if (_cb && !_too_late) {
             _cb(ec, std::move(_response));
         }
@@ -159,9 +142,6 @@ public:
                     "timeout");
 
             _too_late = true;
-
-//            // Gracefully close the socket
-//            _socket.shutdown(asio::ip::tcp::socket::shutdown_both, ec);
         }
     }
 
@@ -296,16 +276,14 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
     try {
         _url = beauty::url(url);
 
-        asio::io_context ioc;
-
         if (!_session) {
             // Create the session on first call...
-            _session = std::make_shared<session_client>(ioc);
+            _session = std::make_shared<session_client>(_sync_ioc);
         }
 
         _session->run(std::move(req), _url, d);
 
-        ioc.run();
+        _sync_ioc.run();
 
         response = std::move(_session->response());
     }

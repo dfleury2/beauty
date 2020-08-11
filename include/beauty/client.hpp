@@ -154,6 +154,7 @@ private:
     url             _url;
 
     std::shared_ptr<session_client> _session;
+    asio::io_context                _sync_ioc;
 
 };
 

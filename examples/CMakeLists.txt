@@ -1,23 +1,11 @@
-add_executable(beauty_application beauty_application.cpp)
-target_link_libraries(beauty_application beauty::beauty)
+# yes, I know...
+file(GLOB SOURCES *.cpp)
 
-add_executable(beauty_application_singleton beauty_application_singleton.cpp)
-target_link_libraries(beauty_application_singleton beauty::beauty)
+foreach(source ${SOURCES})
+    get_filename_component(filename ${source} NAME)
+    get_filename_component(targetname ${source} NAME_WE)
 
-add_executable(beauty_benchmark beauty_benchmark.cpp)
-target_link_libraries(beauty_benchmark beauty::beauty)
-
-add_executable(beauty_server_attributes beauty_server_attributes.cpp)
-target_link_libraries(beauty_server_attributes beauty::beauty)
-
-add_executable(beauty_server_singleton beauty_server_singleton.cpp)
-target_link_libraries(beauty_server_singleton beauty::beauty)
-
-add_executable(beauty_simple_server beauty_simple_server.cpp)
-target_link_libraries(beauty_simple_server beauty::beauty)
-
-add_executable(beauty_simple_ssl_server beauty_simple_ssl_server.cpp)
-target_link_libraries(beauty_simple_ssl_server beauty::beauty)
-
-add_executable(beauty_client_sync beauty_client_sync.cpp)
-target_link_libraries(beauty_client_sync beauty::beauty)
+    add_executable(${targetname} ${filename})
+    
+    target_link_libraries(${targetname} beauty::beauty)
+endforeach()

@@ -28,8 +28,6 @@ int main(int argc, char* argv[])
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    size_t  total_bytes = 0;
-
     beauty::client client;
 
     int i = 0;
@@ -39,7 +37,6 @@ int main(int argc, char* argv[])
         if (ec) {
             ++failure;
         } else {
-            total_bytes += response.body().size();
             if (!i) {
                 message_size = response.body().size();
             }
@@ -59,7 +56,7 @@ int main(int argc, char* argv[])
 
     std::cout << i << " response(s) received" << std::endl;
     std::cout << failure << " failure(s)" << std::endl;
-    std::cout << std::fixed << (total_bytes / 1024.0) <<  " Kbyte(s) received" << std::endl;
+    std::cout << std::fixed << ((message_size * (i - failure)) / 1024.0) <<  " Kbyte(s) received" << std::endl;
 
     auto stop = std::chrono::high_resolution_clock::now();
 

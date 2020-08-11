@@ -23,13 +23,21 @@ int main(int argc, char* argv[])
     std::filesystem::path root = argv[1];
     auto file_index_html = read_file_content(root / "index.html");
 
+    beauty::after(0.5, []{ std::cout << "I am alive" << std::endl;}, true);
+
     beauty::server server;
 
     // Register a GET handler
     server.get("/index.html",
         [&](const beauty::request& req, beauty::response& res) {
-            res.set(beauty::content_type::text_html);
-            res.body() = file_index_html;
+            res.postpone();
+
+            beauty::after(5.0, [&]() {
+                std::cout << "postpone is done" << std::endl;
+                res.set(beauty::content_type::text_html);
+                res.body() = file_index_html;
+                res.done();
+            });
         });
 
     // Listen
