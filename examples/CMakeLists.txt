@@ -18,3 +18,6 @@ target_link_libraries(beauty_simple_server beauty::beauty)
 
 add_executable(beauty_simple_ssl_server beauty_simple_ssl_server.cpp)
 target_link_libraries(beauty_simple_ssl_server beauty::beauty)
+
+add_executable(beauty_client_sync beauty_client_sync.cpp)
+target_link_libraries(beauty_client_sync beauty::beauty)
