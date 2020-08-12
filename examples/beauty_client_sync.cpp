@@ -6,6 +6,8 @@
 #include <thread>
 #include <chrono>
 
+using namespace std::chrono_literals;
+
 //------------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
@@ -25,6 +27,7 @@ int main(int argc, char* argv[])
 
     int message_size = 0;
     int failure  = 0;
+    size_t total_bytes = 0;
 
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -40,9 +43,10 @@ int main(int argc, char* argv[])
             if (!i) {
                 message_size = response.body().size();
             }
+            total_bytes += response.body().size();
 
             if (count == 1) {
-                std::cout << response.body() << std::endl;
+                std::cout << "[" << response.body().substr(0, 80) << "]" << std::endl;
             }
         }
 
@@ -56,7 +60,7 @@ int main(int argc, char* argv[])
 
     std::cout << i << " response(s) received" << std::endl;
     std::cout << failure << " failure(s)" << std::endl;
-    std::cout << std::fixed << ((message_size * (i - failure)) / 1024.0) <<  " Kbyte(s) received" << std::endl;
+    std::cout << std::fixed << (total_bytes / 1024.0) <<  " Kbyte(s) received" << std::endl;
 
     auto stop = std::chrono::high_resolution_clock::now();
 
