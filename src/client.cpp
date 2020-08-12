@@ -22,7 +22,6 @@ private:
         asio::steady_timer      timer;
         bool                    too_late{false};
 
-        beast::flat_buffer      buffer;
         beauty::request         request;
         beauty::response        response;
 
@@ -197,7 +196,7 @@ public:
         }
 
         // Receive the HTTP response
-        beast::http::async_read(_socket, req_ctx->buffer, req_ctx->response,
+        beast::http::async_read(_socket, _buffer, req_ctx->response,
                 asio::bind_executor(_strand,
                     [me = shared_from_this(), req_ctx](boost::system::error_code ec,
                             std::size_t bytes_transferred) {
@@ -248,6 +247,7 @@ private:
     asio::ip::tcp::resolver _resolver;
     asio::ip::tcp::socket   _socket;
     asio::strand<asio::io_context::executor_type> _strand;
+    beast::flat_buffer      _buffer;
 
     // Synchronous response
     beauty::response        _response;
