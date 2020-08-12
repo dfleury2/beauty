@@ -18,14 +18,14 @@ int main(int argc, char* argv[])
 
     beauty::router router;
 
-    beauty::application app(threads);
+    beauty::application app;
 
     asio::ip::tcp::endpoint ep{address, port};
 
     // Create and launch a listening port
     std::make_shared<beauty::acceptor>(app, ep, router)->run();
 
-    app.run();
+    app.start(threads);
 
     std::cout << "Waiting a bit";
     std::cout.flush();

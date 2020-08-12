@@ -18,7 +18,8 @@ int main(int argc, char* argv[])
     std::string doc_root = argv[3];
     auto threads  = std::max<int>(1, std::atoi(argv[4]));
 
-    auto& app = beauty::application::Instance(threads);
+    auto& app = beauty::application::Instance();
+    app.start(threads);
     beauty::router router;
 
     asio::ip::tcp::endpoint ep{address, port};

@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
     fs::path doc_root   = argv[3];
     auto threads        = std::max<int>(1, std::atoi(argv[4]));
 
-    beauty::server s(threads);
+    beauty::server s;
     s.get("/:filename", [&doc_root](const beauty::request& req, beauty::response& res) {
             auto filename = req.a("filename");
 
@@ -47,5 +47,7 @@ int main(int argc, char* argv[])
             res.body() = read_file_content(doc_root / dirname / filename);
         })
      .listen(port, address)
-     .run();
+     .start(threads);
+
+    beauty::run();
 }

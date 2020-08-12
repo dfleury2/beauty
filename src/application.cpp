@@ -12,46 +12,18 @@ std::once_flag flag;
 std::unique_ptr<beauty::application> g_application;
 }
 
-
 namespace beauty {
-
 // --------------------------------------------------------------------------
-application&
-application::Instance(int concurrency)
-{
-    std::call_once(flag, [concurrency] {
-        g_application = std::make_unique<application>(concurrency);
-        g_application->run();
-    });
-    return *g_application;
-}
-
-// --------------------------------------------------------------------------
-application&
-application::Instance(certificates&& c, int concurrency)
-{
-    std::call_once(flag, [concurrency, &c] {
-        g_application = std::make_unique<application>(std::move(c), concurrency);
-        g_application->run();
-    });
-    return *g_application;
-}
-
-// --------------------------------------------------------------------------
-application::application(int concurrency) :
-    _ioc(concurrency),
+application::application() :
     _work(asio::make_work_guard(_ioc)),
-    _ssl_context(asio::ssl::context::sslv23),
-    _threads(std::max(1, concurrency))
+    _ssl_context(asio::ssl::context::sslv23)
 {}
 
 // --------------------------------------------------------------------------
-application::application(certificates&& c, int concurrency) :
-    _ioc(concurrency),
+application::application(certificates&& c) :
     _work(asio::make_work_guard(_ioc)),
     _ssl_context(asio::ssl::context::sslv23),
-    _certificates(std::move(c)),
-    _threads(std::max(1, concurrency))
+    _certificates(std::move(c))
 {
     load_server_certificates();
 }
@@ -64,14 +36,15 @@ application::~application()
 
 // --------------------------------------------------------------------------
 void
-application::run()
+application::start(int concurrency)
 {
     // Prevent to run twice
-    if (is_running()) {
+    if (is_started()) {
         return;
     }
 
     // Run the I/O service on the requested number of threads
+    _threads.resize(std::max(1, concurrency));
     for(auto& t : _threads) {
         t = std::thread([this] {
             this->_ioc.run();
@@ -80,10 +53,15 @@ application::run()
 }
 
 // --------------------------------------------------------------------------
+void
+application::run() {
+    _ioc.run();
+}
+// --------------------------------------------------------------------------
 bool
-application::is_running() const
+application::is_started() const
 {
-    return _threads[0].joinable();
+    return (_threads.size() && _threads[0].joinable());
 }
 
 // --------------------------------------------------------------------------
@@ -137,13 +115,39 @@ application::load_server_certificates()
     }
 }
 
+
+// --------------------------------------------------------------------------
+application&
+application::Instance()
+{
+    std::call_once(flag, [] {
+        g_application = std::make_unique<application>();
+    });
+    return *g_application;
+}
+
+// --------------------------------------------------------------------------
+application&
+application::Instance(certificates&& c)
+{
+    std::call_once(flag, [cert = std::move(c)]() mutable {
+        g_application = std::make_unique<application>(std::move(cert));
+    });
+    return *g_application;
+}
+
 // --------------------------------------------------------------------------
 void
-run(int concurrency)
+start(int concurrency)
 {
-    application::Instance(concurrency).run();
-    // May be, may be not...
-    // application::Instance(concurrency).ioc().run();
+    application::Instance().start(concurrency);
+}
+
+// --------------------------------------------------------------------------
+void
+run()
+{
+    application::Instance().run();
 }
 
 // --------------------------------------------------------------------------
@@ -154,9 +158,9 @@ stop()
 }
 
 // --------------------------------------------------------------------------
-bool is_running()
+bool is_started()
 {
-    return application::Instance().is_running();
+    return application::Instance().is_started();
 }
 
 }

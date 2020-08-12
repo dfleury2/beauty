@@ -7,13 +7,13 @@
 namespace beauty
 {
 // --------------------------------------------------------------------------
-server::server(int concurrency) :
-        _app(beauty::application::Instance(concurrency))
+server::server() :
+        _app(beauty::application::Instance())
 {}
 
 // --------------------------------------------------------------------------
-server::server(certificates&& c, int concurrency) :
-        _app(beauty::application::Instance(std::move(c), concurrency))
+server::server(certificates&& c) :
+        _app(beauty::application::Instance(std::move(c)))
 {}
 
 // --------------------------------------------------------------------------
@@ -39,11 +39,17 @@ server::listen(int port, const char* address)
 
 // --------------------------------------------------------------------------
 void
-server::run()
+server::start(int concurrency)
 {
-    _app.ioc().run();
+    _app.start(concurrency);
 }
 
+// --------------------------------------------------------------------------
+void
+server::run()
+{
+    _app.run();
+}
 
 // --------------------------------------------------------------------------
 void
@@ -52,6 +58,7 @@ server::stop()
     if (_acceptor) {
         _acceptor->stop();
     }
+    _app.stop();
 }
 
 // --------------------------------------------------------------------------

@@ -36,11 +36,11 @@ int main(int argc, char* argv[])
     beauty::certificates c;
     c.certificat_chain  = read_file_content("./certificat.pem");
     c.private_key       = read_file_content("./private_key.pem");
-//    c.temporary_dh      = read_file_content("./temp_dh.pem");
+//    c.temporary_dh      = read_file_content(etc_dir + "/temp_dh.pem");
 //    c.password          = "test";
 
     // Http Server
-    beauty::server s(std::move(c), threads);
+    beauty::server s(std::move(c));
 
     s.get("/:filename", [&doc_root](const beauty::request& req, beauty::response& res) {
             auto& filename = req.a("filename");
@@ -56,5 +56,7 @@ int main(int argc, char* argv[])
             res.body() = read_file_content(doc_root / dirname / filename);
         })
      .listen(port, address)
-     .run();
+     .start(threads);
+
+    beauty::run();
 }

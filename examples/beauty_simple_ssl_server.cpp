@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
     c.private_key       = read_file_content("../../examples/private_key.pem");
 
     // Http Server
-    beauty::server s(std::move(c), threads);
+    beauty::server s(std::move(c));
 
     s.get("/:filename", [&doc_root](const beauty::request& req, beauty::response& res) {
             auto& filename = req.a("filename");
@@ -54,5 +54,6 @@ int main(int argc, char* argv[])
             res.body() = read_file_content(doc_root / dirname / filename);
         })
      .listen(port, address)
-     .run();
+     .start(threads);
+    s.run();
 }

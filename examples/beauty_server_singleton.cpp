@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
     std::string index_html = read_file_content(doc_root + "/index.html");
     std::string debian_ico = read_file_content(doc_root + "/icons/debian-logo.png");
 
-    beauty::server s(threads);
+    beauty::server s;
     s.get("/index.html", [&index_html](const beauty::request& req, beauty::response& res) {
             res.set(beauty::content_type::text_html);
             res.body() = index_html;
@@ -42,8 +42,8 @@ int main(int argc, char* argv[])
             res.body() = debian_ico;
         })
      .listen(port, address)
+     .start(threads);
     ;
-
 
     std::cout << "Waiting a bit" << std::flush;
     //for(int i = 0; i < 10; ++i) {

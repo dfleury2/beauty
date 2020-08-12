@@ -160,6 +160,10 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
         const std::string& url, client_cb&& cb)
 {
     try {
+        if (!beauty::application::Instance().is_started()) {
+            beauty::application::Instance().start();
+        }
+
         _url = beauty::url(url);
 
         if (beauty::application::Instance().is_ssl_activated()) {

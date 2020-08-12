@@ -12,26 +12,32 @@
 namespace asio = boost::asio;
 
 namespace beauty {
-
 // --------------------------------------------------------------------------
 class application {
 public:
-    application(int concurrency = 1);
-    application(certificates&& c, int concurrency = 1);
+    application();
+    application(certificates&& c);
 
     ~application();
 
-    void run();
-    bool is_running() const;
+    // Start the thread pool, running the event loop, not blocking
+    void start(int concurrency = 1);
 
+    // Check is the thread pool is started
+    bool is_started() const;
+
+    // Run the event loop in the current thread, blocking
+    void run();
+
+    // Stop the event loop
     void stop();
 
     asio::io_context& ioc() { return _ioc; }
     asio::ssl::context& ssl_context() { return _ssl_context; }
     bool is_ssl_activated() const { return (bool)_certificates; }
 
-    static application& Instance(int concurrency = 1);
-    static application& Instance(certificates&& c, int concurrency = 1);
+    static application& Instance();
+    static application& Instance(certificates&& c);
 
 private:
     asio::io_context            _ioc;
@@ -48,8 +54,8 @@ private:
 // --------------------------------------------------------------------------
 // Singleton direct access
 // --------------------------------------------------------------------------
-void run(int concurrency = 1);
+void start(int concurrency = 1);
+bool is_started();
+void run();
 void stop();
-bool is_running();
-
 }

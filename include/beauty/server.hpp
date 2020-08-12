@@ -15,14 +15,14 @@ namespace beauty
 class server
 {
 public:
-    server(int concurrency = 1);
-    server(certificates&& c, int concurrency = 1);
+    server();
+    server(certificates&& c);
     ~server();
 
     server& listen(int port = 0, const char* address = "0.0.0.0");
-    void run();
-
+    void start(int concurrency = 2);
     void stop();
+    void run();
 
     server& get(std::string path, route_cb&& cb);
     server& put(std::string path, route_cb&& cb);
