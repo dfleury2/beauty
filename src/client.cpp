@@ -174,6 +174,7 @@ public:
         auto req_ctx = *_requests.begin();
        _requests.pop_front();
 
+       //std::cout << "start a write" << std::endl;
        _pending_request = true;
 
        // Send the HTTP request to the remote host
@@ -194,9 +195,6 @@ public:
         if(ec) {
             return fail(*req_ctx, ec, "write");
         }
-
-        // Clear the response
-        _response = {};
 
         // Receive the HTTP response
         beast::http::async_read(_socket, req_ctx->buffer, req_ctx->response,
@@ -233,6 +231,7 @@ public:
     void on_timer(boost::system::error_code ec,
             std::shared_ptr<request_context> req_ctx)
     {
+        //std::cout << "on timer" << std::endl;
         if (!ec && !req_ctx->too_late) {
             fail(*req_ctx, boost::system::error_code(boost::system::errc::timed_out,
                     boost::system::system_category()),
@@ -382,6 +381,7 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
         _session->run(std::move(req), _url, d);
 
         _sync_ioc.run();
+        _sync_ioc.restart();
 
         response = std::move(_session->response());
     }
