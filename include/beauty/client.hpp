@@ -18,7 +18,12 @@ namespace beast = boost::beast;
 
 namespace beauty
 {
+// Ugly forward declaration to be removed...
+template<bool SSL>
 class session_client;
+
+using session_client_http = session_client<false>;
+using session_client_https = session_client<true>;
 
 // --------------------------------------------------------------------------
 class client
@@ -29,6 +34,7 @@ public:
 
 public:
     client() = default;
+    client(certificates&& c);
 
     // ---
     // GET
@@ -153,9 +159,11 @@ public:
 private:
     url             _url;
 
-    std::shared_ptr<session_client> _session;
-    asio::io_context                _sync_ioc;
+    // Waiting for some improvements...no more double shared_ptr
+    std::shared_ptr<session_client_http> _session_http;
+    std::shared_ptr<session_client_https> _session_https;
 
+    asio::io_context                _sync_ioc;
 };
 
 }

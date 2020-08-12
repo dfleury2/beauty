@@ -73,6 +73,7 @@ public:
 
     void do_read()
     {
+        //std::cout << "Wait for a request" << std::endl;
         // Make the request empty before reading,
         // otherwise the operation behavior is undefined.
         _request = {};
