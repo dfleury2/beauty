@@ -46,7 +46,6 @@ set_target_properties(beauty
 
 target_compile_definitions(beauty
     PRIVATE
-        BOOST_ALL_DYN_LINK
         LINUX
         UNIX
 )
