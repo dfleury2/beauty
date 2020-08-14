@@ -25,10 +25,10 @@ int main()
     })
 
     // Open the listening port
-    .listen(8085)
+    server.listen(8085)
 
     // Run the event loop - no additional thread
-    .run();
+    server.run();
 }
 ```
 
@@ -68,13 +68,13 @@ int main()
 int main()
 {
     // Launch a repeatable timer each 250ms
-    beauty::after(0.250, [timer_count = 4]() mutable {
+    beauty::repeat(0.250, [timer_count = 4]() mutable {
             std::cout << "Tick..." << std::endl;
             if (--timer_count == 0) {
                 std::cout << "Dring !" << std::endl;
                 beauty::stop();
             }
-        }, true);
+        });
 
     // Launch a one shot timer after 600ms
     beauty::after(0.600, [] {
@@ -111,4 +111,16 @@ int main()
 }
 ```
 
-Further examples can be found into the examples directory at the root of the project.
+Further examples can be found into the binaries directory at the root of the project.
+
+## Build
+
+Beauty depends Boost.Beast and OpenSsl.
+
+```bash
+git clone https://github.com/dfleury2/beauty.git
+cd beauty
+mkdir build && cd build
+cmake ../sources
+cmake --build . -j4
+```
