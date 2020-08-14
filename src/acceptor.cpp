@@ -21,6 +21,7 @@ acceptor::acceptor(
     _acceptor.open(endpoint.protocol(), ec);
     if (ec) {
         fail(ec, "open");
+        _app.stop();
         return;
     }
 
@@ -28,6 +29,7 @@ acceptor::acceptor(
     _acceptor.set_option(asio::socket_base::reuse_address(true));
     if (ec) {
         fail(ec, "set_option");
+        _app.stop();
         return;
     }
 
@@ -35,6 +37,7 @@ acceptor::acceptor(
     _acceptor.bind(endpoint, ec);
     if (ec) {
         fail(ec, "bind");
+        _app.stop();
         return;
     }
 
@@ -45,6 +48,7 @@ acceptor::acceptor(
     _acceptor.listen(asio::socket_base::max_listen_connections, ec);
     if (ec) {
         fail(ec, "listen");
+        _app.stop();
         return;
     }
 }
@@ -59,7 +63,7 @@ acceptor::~acceptor()
 void
 acceptor::run()
 {
-    if(! _acceptor.is_open()) {
+    if (!_acceptor.is_open()) {
         return;
     }
     do_accept();
@@ -95,6 +99,7 @@ acceptor::on_accept(boost::system::error_code ec)
 
     if (ec) {
         fail(ec, "accept");
+        _app.stop();
     }
     else {
         // Create the session SLL or not and run it

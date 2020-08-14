@@ -23,6 +23,14 @@ signal_set::add(int s)
 void
 signal_set::run()
 {
+    if (_app.is_stopped()) {
+        return;
+    }
+
+    if (!_app.is_started()) {
+        _app.start();
+    }
+
     _signals.async_wait([me = shared_from_this()](const boost::system::error_code& ec, int s) {
         if (!ec) {
             me->_cb(s);

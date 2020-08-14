@@ -16,14 +16,16 @@ namespace beauty {
 // --------------------------------------------------------------------------
 application::application() :
     _work(asio::make_work_guard(_ioc)),
-    _ssl_context(asio::ssl::context::sslv23)
+    _ssl_context(asio::ssl::context::sslv23),
+    _state(State::waiting)
 {}
 
 // --------------------------------------------------------------------------
 application::application(certificates&& c) :
     _work(asio::make_work_guard(_ioc)),
     _ssl_context(asio::ssl::context::sslv23),
-    _certificates(std::move(c))
+    _certificates(std::move(c)),
+    _state(State::waiting)
 {
     load_server_certificates();
 }
@@ -43,41 +45,49 @@ application::start(int concurrency)
         return;
     }
 
+    if (is_stopped()) {
+        _ioc.restart();
+    }
+    _state = State::started;
+
     // Run the I/O service on the requested number of threads
     _threads.resize(std::max(1, concurrency));
     for(auto& t : _threads) {
         t = std::thread([this] {
-            this->_ioc.run();
+            for(;;) {
+                try {
+                    _ioc.run();
+                    break;
+                }
+                catch(const std::exception& ex) {
+                    std::cout << "worker error: " << ex.what() << std::endl;
+                }
+            }
         });
+        t.detach();
     }
-}
-
-// --------------------------------------------------------------------------
-void
-application::run() {
-    _ioc.run();
-}
-// --------------------------------------------------------------------------
-bool
-application::is_started() const
-{
-    return (_threads.size() && _threads[0].joinable());
 }
 
 // --------------------------------------------------------------------------
 void
 application::stop()
 {
+    _state = State::stopped;
+
     _ioc.stop();
+}
 
-    for(auto&& t : _threads) {
-        if (t.joinable()) {
-            t.join();
-        }
+// --------------------------------------------------------------------------
+void
+application::run()
+{
+    if (is_stopped()) {
+        _ioc.restart();
     }
+    _state = State::started;
 
-    // Prepare for the next start
-    _ioc.restart();
+    // Run
+    _ioc.run();
 }
 
 // --------------------------------------------------------------------------

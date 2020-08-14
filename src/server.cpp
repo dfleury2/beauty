@@ -65,7 +65,9 @@ server::stop()
 server&
 server::get(std::string path, route_cb&& cb)
 {
-    _router.add_route(beast::http::verb::get, beauty::route(std::move(path), std::move(cb)));
+    _router.add_route(
+            beast::http::verb::get,
+            beauty::route(std::move(path), std::move(cb)));
     return *this;
 }
 
@@ -73,7 +75,9 @@ server::get(std::string path, route_cb&& cb)
 server&
 server::put(std::string path, route_cb&& cb)
 {
-    _router.add_route(beast::http::verb::put, beauty::route(std::move(path), std::move(cb)));
+    _router.add_route(
+            beast::http::verb::put,
+            beauty::route(std::move(path), std::move(cb)));
     return *this;
 }
 
@@ -81,7 +85,9 @@ server::put(std::string path, route_cb&& cb)
 server&
 server::post(std::string path, route_cb&& cb)
 {
-    _router.add_route(beast::http::verb::post, beauty::route(std::move(path), std::move(cb)));
+    _router.add_route(
+            beast::http::verb::post,
+            beauty::route(std::move(path), std::move(cb)));
     return *this;
 }
 
@@ -89,7 +95,9 @@ server::post(std::string path, route_cb&& cb)
 server&
 server::options(std::string path, route_cb&& cb)
 {
-    _router.add_route(beast::http::verb::options, beauty::route(std::move(path), std::move(cb)));
+    _router.add_route(
+            beast::http::verb::options,
+            beauty::route(std::move(path), std::move(cb)));
     return *this;
 }
 

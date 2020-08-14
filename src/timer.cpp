@@ -17,6 +17,14 @@ timer::timer(const beauty::duration& d, timer_cb&& cb, bool repeat) :
 void
 timer::run()
 {
+    if (_app.is_stopped()) {
+        return;
+    }
+
+    if (!_app.is_started()) {
+        _app.start();
+    }
+
     _timer.expires_after(_duration);
 
     _timer.async_wait([me = shared_from_this()](const boost::system::error_code& ec) {
@@ -41,9 +49,23 @@ after(const duration& d, timer_cb&& cb, bool repeat)
 }
 
 // --------------------------------------------------------------------------
-void after(double seconds, timer_cb&& cb, bool repeat)
+void
+after(double seconds, timer_cb&& cb, bool repeat)
 {
     after(std::chrono::milliseconds((int)(seconds * 1000)), std::move(cb), repeat);
+}
+
+// --------------------------------------------------------------------------
+void
+repeat(const duration& d, timer_cb&& cb)
+{
+    after(d, std::move(cb), true);
+}
+
+// --------------------------------------------------------------------------
+void repeat(double seconds, timer_cb&& cb)
+{
+    after(seconds, std::move(cb), true);
 }
 
 }

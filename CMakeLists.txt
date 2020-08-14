@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.6)
 
 project(Beauty)
 
-set(VERSION 0.1)
+set(VERSION 0.1-rc)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -21,6 +21,6 @@ find_package(Threads REQUIRED)
 # OpenSSl
 find_package(OpenSSL)
 
-
+# Beauty
 add_subdirectory(src)
 add_subdirectory(examples)

@@ -35,4 +35,7 @@ private:
 void after(const duration& d, timer_cb&& cb, bool repeat = false);
 void after(double seconds, timer_cb&& cb, bool repeat = false);
 
+void repeat(const duration& d, timer_cb&& cb);
+void repeat(double seconds, timer_cb&& cb);
+
 }
