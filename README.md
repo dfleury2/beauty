@@ -13,7 +13,7 @@ Beauty is a layer above <a href="https://github.com/boostorg/beast">Boost.Beast<
 - Timeout support
 - Server easy routing with placeholders
 - Timers and signals support included
-- Startable and stoppable application event loop 
+- Startable and stoppable application event loop
 - Customizable thread pool size
 
 
@@ -134,8 +134,8 @@ Beauty depends Boost.Beast and OpenSsl. You can rely on Conan to get the package
 git clone https://github.com/dfleury2/beauty.git
 cd beauty
 mkdir build && cd build
-cmake ../sources
-cmake --build . -j4
+cmake ..
+cmake --build .
 ```
 
 
@@ -144,7 +144,8 @@ cmake --build . -j4
 git clone https://github.com/dfleury2/beauty.git
 cd beauty
 mkdir build && cd build
-cmake ../sources  -DCONAN_DISABLE_CHECK_COMPILER=1
+conan install ..
+cmake ..
 cmake --build . --config Release
 ```
 

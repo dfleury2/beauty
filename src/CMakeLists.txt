@@ -60,8 +60,7 @@ elseif(WIN32)
         PUBLIC
             _WIN32_WINNT=0xA00
             _CRT_SECURE_NO_WARNINGS
-            # Must be 0 in Release mode...
-            _ITERATOR_DEBUG_LEVEL=2
+            _ITERATOR_DEBUG_LEVEL=$<IF:$<CONFIG:Debug>,2,0>
     )
 endif()
 
@@ -75,20 +74,19 @@ target_include_directories(beauty
 target_link_libraries(beauty
     PUBLIC
         OpenSSL::SSL
-        Boost::system
-        Threads::Threads
+        boost::boost
         ${CMAKE_DL_LIBS}
 )
 
 if(UNIX)
     target_link_libraries(beauty
         PUBLIC
+            Threads::Threads
             stdc++fs
     )
 elseif(WIN32)
     target_link_libraries(beauty
         PUBLIC
-            Boost::disable_autolinking
             CRYPT32.LIB
     )
 endif()
