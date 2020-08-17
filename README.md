@@ -78,7 +78,8 @@ int main()
 int main()
 {
     // Launch a repeatable timer each 250ms
-    beauty::repeat(0.250, [timer_count = 4]() mutable {
+    int timer_count = 4;
+    beauty::repeat(0.250, [&timer_count]() {
             std::cout << "Tick..." << std::endl;
             if (--timer_count == 0) {
                 std::cout << "Dring !" << std::endl;
@@ -146,3 +147,5 @@ mkdir build && cd build
 cmake ../sources  -DCONAN_DISABLE_CHECK_COMPILER=1
 cmake --build . --config Release
 ```
+
+To be improved...
