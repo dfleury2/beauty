@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
     int step        = count / 10;
     if (!step) step = 1;
 
-    int message_size = 0;
+    size_t message_size = 0;
     int failure  = 0;
     size_t total_bytes = 0;
 
@@ -87,6 +87,4 @@ int main(int argc, char* argv[])
             std::chrono::duration<double>>(stop - start).count();
     std::cout << "Total duration:      " << delay << " seconds" << std::endl;
     std::cout  << std::fixed << "Requests per seconds: " << (count / delay) << " [#/sec]" << std::endl;
-
-
 }

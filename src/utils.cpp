@@ -25,7 +25,7 @@ split(const T& str, char sep)
         begin = end + 1;
     }
     if (str.empty() || *str.rbegin() == sep)
-        columns.push_back(std::string_view(&str[begin], 0));
+        columns.push_back(std::string_view(&str[0] + begin, 0));
 
     return columns;
 }

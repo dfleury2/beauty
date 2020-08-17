@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
     std::filesystem::path root = argv[1];
     auto file_index_html = read_file_content(root / "index.html");
 
-    beauty::after(0.5, []{ std::cout << "I am alive" << std::endl;}, true);
+    beauty::repeat(0.5, []{ std::cout << "I am alive" << std::endl;});
 
     beauty::server server;
 

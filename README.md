@@ -7,7 +7,17 @@
 
 Beauty is a layer above <a href="https://github.com/boostorg/beast">Boost.Beast</a> which provide facilities to create Http server or client. Beauty allows the creation of synchronous or asynchronous server and client, and adds some signals and timer management based on <a href="https://github.com/boostorg/asio">Boost.Asio</a>
 
-Here some examples:
+## Features
+- Http or Http/s server or client side
+- Synchronous or Asynchronous API
+- Timeout support
+- Server easy routing with placeholders
+- Timers and signals support included
+- Startable and stoppable application event loop 
+- Customizable thread pool size
+
+
+## Examples
 
 - a synchronous server
 
@@ -95,8 +105,8 @@ int main()
 
 int main()
 {
-    // Catch the small signal
-    beauty::signal(SIGUSR1, [](int s) {
+    // Catch the small signals
+    beauty::signal({SIGUSR1, SIGUSR2}, [](int s) {
         std::cout << "Shot miss..." << std::endl;
     });
 
@@ -115,7 +125,9 @@ Further examples can be found into the binaries directory at the root of the pro
 
 ## Build
 
-Beauty depends Boost.Beast and OpenSsl.
+Beauty depends Boost.Beast and OpenSsl. You can rely on Conan to get the package or only the FindPackage from CMake.
+
+### Linux
 
 ```bash
 git clone https://github.com/dfleury2/beauty.git
@@ -123,4 +135,14 @@ cd beauty
 mkdir build && cd build
 cmake ../sources
 cmake --build . -j4
+```
+
+
+### Windows
+```bash
+git clone https://github.com/dfleury2/beauty.git
+cd beauty
+mkdir build && cd build
+cmake ../sources  -DCONAN_DISABLE_CHECK_COMPILER=1
+cmake --build . --config Release
 ```

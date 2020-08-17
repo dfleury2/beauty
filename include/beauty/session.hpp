@@ -108,16 +108,15 @@ public:
         }
 
         // Send the response
-        handle_request([this](auto response) {
-                if (!response->is_postponed()) {
-                    do_write(response);
-                } else {
-                    response->on_done([me = this->shared_from_this(), response] {
-                        me->do_write(response);
-                    });
-                }
-            }
-        );
+        auto response = handle_request();
+
+        if (!response->is_postponed()) {
+            do_write(response);
+        } else {
+            response->on_done([me = this->shared_from_this(), response] {
+                me->do_write(response);
+            });
+        }
     }
 
     void do_write(std::shared_ptr<response> response)
@@ -200,13 +199,13 @@ private:
     const beauty::router&   _router;
 
 private:
-    template<typename Send>
-    void handle_request(Send&& send)
+    std::shared_ptr<response>
+    handle_request()
     {
         // Make sure we can handle the method
         auto found_method = _router.find(_request.method());
         if (found_method == _router.end()) {
-            return send(bad_request(_request, "Not supported HTTP-method"));
+            return bad_request(_request, "Not supported HTTP-method");
         }
 
         // Try to match a route for this request target
@@ -220,16 +219,15 @@ private:
 
                     route.execute(_request, *res); // Call the route user handler
 
-                    send(res);
-                    return;
+                    return res;
                 }
                 catch(const std::exception& ex) {
-                    return send(server_error(_request, ex.what()));
+                    return server_error(_request, ex.what());
                 }
             }
         }
 
-        return send(not_found(_request));
+        return not_found(_request);
     }
 };
 

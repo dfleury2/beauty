@@ -1,5 +1,6 @@
 add_library(beauty
     ../include/beauty/acceptor.hpp
+    ../include/beauty/acceptor.hpp
     ../include/beauty/application.hpp
     ../include/beauty/attributes.hpp
     ../include/beauty/beauty.hpp
@@ -11,7 +12,6 @@ add_library(beauty
     ../include/beauty/route.hpp
     ../include/beauty/router.hpp
     ../include/beauty/server.hpp
-    ../include/beauty/acceptor.hpp
     ../include/beauty/session.hpp
     ../include/beauty/signal.hpp
     ../include/beauty/timer.hpp
@@ -23,6 +23,7 @@ add_library(beauty
     ./client.cpp
     ./route.cpp
     ./server.cpp
+    ./session_client.hpp
     ./signal.cpp
     ./timer.cpp
     ./url.cpp
@@ -35,7 +36,6 @@ set_target_properties(beauty
     PROPERTIES
         POSITION_INDEPENDENT_CODE ON
         CXX_STANDARD 20
-        LINK_FLAGS "-Wl,-z,relro -Wl,--as-needed"
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
@@ -44,11 +44,26 @@ set_target_properties(beauty
         VERSION ${VERSION}
 )
 
-target_compile_definitions(beauty
-    PRIVATE
-        LINUX
-        UNIX
-)
+if(UNIX)
+    target_compile_definitions(beauty
+        PRIVATE
+            LINUX
+            UNIX
+            _FORTIFY_SOURCE=2
+    )
+    set_target_properties(beauty
+        PROPERTIES
+            LINK_FLAGS "-Wl,-z,relro -Wl,--as-needed"
+    )
+elseif(WIN32)
+    target_compile_definitions(beauty
+        PUBLIC
+            _WIN32_WINNT=0xA00
+            _CRT_SECURE_NO_WARNINGS
+            # Must be 0 in Release mode...
+            _ITERATOR_DEBUG_LEVEL=2
+    )
+endif()
 
 target_include_directories(beauty
     PUBLIC
@@ -62,7 +77,21 @@ target_link_libraries(beauty
         OpenSSL::SSL
         Boost::system
         Threads::Threads
+        ${CMAKE_DL_LIBS}
 )
+
+if(UNIX)
+    target_link_libraries(beauty
+        PUBLIC
+            stdc++fs
+    )
+elseif(WIN32)
+    target_link_libraries(beauty
+        PUBLIC
+            Boost::disable_autolinking
+            CRYPT32.LIB
+    )
+endif()
 
 configure_file(./version.hpp.in ./beauty/version.hpp)
 

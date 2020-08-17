@@ -4,6 +4,8 @@ project(Beauty)
 
 set(VERSION 0.1-rc)
 
+option(CONAN "Enable/disable Conan" ON)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSION OFF)

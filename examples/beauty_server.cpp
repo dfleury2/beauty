@@ -10,9 +10,9 @@ namespace fs = std::filesystem;
 
 //------------------------------------------------------------------------------
 std::string
-read_file_content(const fs::path& filename)
+read_file_content(const fs::path& filename, bool binary = false)
 {
-    std::ifstream file{filename};
+    std::ifstream file{filename, (binary ? std::ios_base::binary : std::ios_base::in)};
     return {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
 }
 
@@ -45,10 +45,10 @@ int main(int argc, char* argv[])
             auto& dirname  = req.a("dirname");
             auto& filename = req.a("filename");
 
-            res.set(beauty::content_type::image_x_icon);
+            res.set(beauty::content_type::image_png);
             // or
             // res.set_header(beast::http::field::content_type, beauty::content_type::image_x_icon.value);
-            res.body() = read_file_content(doc_root / dirname / filename);
+            res.body() = read_file_content(doc_root / dirname / filename, true);
         })
      .listen(port, address)
      .start(threads);
