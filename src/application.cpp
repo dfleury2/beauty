@@ -1,6 +1,7 @@
 #include <beauty/application.hpp>
 
 #include <beauty/certificate.hpp>
+#include <beauty/timer.hpp>
 
 #include <boost/asio.hpp>
 
@@ -52,7 +53,9 @@ application::start(int concurrency)
 
     // Run the I/O service on the requested number of threads
     _threads.resize(std::max(1, concurrency));
+    _active_threads = 0;
     for(auto& t : _threads) {
+        ++_active_threads;
         t = std::thread([this] {
             for(;;) {
                 try {
@@ -63,18 +66,30 @@ application::start(int concurrency)
                     std::cout << "worker error: " << ex.what() << std::endl;
                 }
             }
+            --_active_threads;
         });
         t.detach();
+            // Threads are detached, it's easier to stop inside an handler
     }
 }
 
 // --------------------------------------------------------------------------
 void
-application::stop()
+application::stop(bool reset)
 {
     _state = State::stopped;
 
+    if (reset) {
+        for(auto&& t : timers) {
+            t->stop();
+        }
+    }
+
     _ioc.stop();
+
+    while(_active_threads != 0) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
 }
 
 // --------------------------------------------------------------------------

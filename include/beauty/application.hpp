@@ -13,6 +13,8 @@
 namespace asio = boost::asio;
 
 namespace beauty {
+class timer;
+
 // --------------------------------------------------------------------------
 class application {
 public:
@@ -27,8 +29,8 @@ public:
     bool is_started() const { return _state == State::started; }
     bool is_stopped() const { return _state == State::stopped; }
 
-    // Stop the event loop
-    void stop();
+    // Stop the event loop, reset wil cancel all current operations (timers)
+    void stop(bool reset = true);
 
     // Run the event loop in the current thread, blocking
     void run();
@@ -40,6 +42,9 @@ public:
     static application& Instance();
     static application& Instance(certificates&& c);
 
+    std::vector<std::shared_ptr<timer>> timers;
+        // Need for cancellation, to be improved...
+
 private:
     asio::io_context            _ioc;
     asio::executor_work_guard<asio::io_context::executor_type> _work;
@@ -50,6 +55,7 @@ private:
 
     enum class State { waiting, started, stopped };
     std::atomic<State> _state; // Three State allows a good ioc.restart
+    std::atomic<int>   _active_threads; // std::barrier in C++20
 
 private:
     void load_server_certificates();
