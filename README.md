@@ -11,11 +11,11 @@ Beauty is a layer above <a href="https://github.com/boostorg/beast">Boost.Beast<
 - Http or Http/s server or client side
 - Synchronous or Asynchronous API
 - Timeout support
+- Postponed response from server support
 - Server easy routing with placeholders
 - Timers and signals support included
 - Startable and stoppable application event loop
 - Customizable thread pool size
-
 
 ## Examples
 
