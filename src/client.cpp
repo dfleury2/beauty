@@ -189,12 +189,11 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
     catch(const boost::system::system_error& ex) {
         cb(ex.code(), {});
     }
-    catch(const std::exception& ex) {
+    catch(const std::exception&) {
         cb(boost::system::error_code(boost::system::errc::bad_address,
                 boost::system::system_category()), {});
         return;
     }
-
 }
 
 }
