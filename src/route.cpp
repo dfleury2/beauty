@@ -7,6 +7,10 @@ namespace beauty
 route::route(const std::string& path, route_cb&& cb) :
         _cb(std::move(cb))
 {
+    if (path.empty() || path[0] !='/') {
+        throw std::runtime_error("Route path [" + path + "] must begin with '/'.");
+    }
+
     for(auto&& p : split(path, '/')) {
         _segments.push_back(std::string(p));
     }

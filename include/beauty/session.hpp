@@ -74,20 +74,20 @@ public:
     void do_read()
     {
         //std::cout << "Wait for a request" << std::endl;
-        // Make the request empty before reading,
-        // otherwise the operation behavior is undefined.
-        _request = {};
+        // Make a new request_parser before reading
+        _request_parser.reset(new beast::http::request_parser<beast::http::string_body>());
+        _request_parser->body_limit(1024 * 1024 * 1024); // 1Go..
 
         // Read a full request (only if on _stream/_socket)
         if constexpr(SSL) {
-            beast::http::async_read(_stream, _buffer, _request,
+            beast::http::async_read(_stream, _buffer, *_request_parser,
                 asio::bind_executor(
                     _strand,
                     [me = this->shared_from_this()](auto ec, auto bytes_transferred) {
                         me->on_read(ec, bytes_transferred);
                     }));
         } else {
-            beast::http::async_read(_socket, _buffer, _request,
+            beast::http::async_read(_socket, _buffer, *_request_parser,
                 asio::bind_executor(
                     _strand,
                     [me = this->shared_from_this()](auto ec, auto bytes_transferred) {
@@ -194,7 +194,8 @@ private:
     stream_type                                   _stream = {};
     asio::strand<asio::io_context::executor_type> _strand;
     beast::flat_buffer  _buffer;
-    request             _request;
+    beauty::request     _request;
+    std::unique_ptr<beast::http::request_parser<beast::http::string_body>> _request_parser;
 
     const beauty::router&   _router;
 
@@ -203,6 +204,8 @@ private:
     handle_request()
     {
         // Make sure we can handle the method
+        _request = _request_parser->release();
+
         auto found_method = _router.find(_request.method());
         if (found_method == _router.end()) {
             return bad_request(_request, "Not supported HTTP-method");

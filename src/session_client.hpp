@@ -22,12 +22,14 @@ private:
     struct request_context {
         request_context(asio::io_context& ioc) :
             timer(ioc)
-        {}
+        {
+            response.body_limit(1024 * 1024 * 1024); // 1Go
+        }
         asio::steady_timer      timer;
         bool                    too_late{false};
 
         beauty::request         request;
-        beauty::response        response;
+        beast::http::response_parser<beast::http::string_body> response;
 
         client::client_cb       cb;
 
@@ -305,10 +307,11 @@ public:
 
         if (req_ctx->cb) {
             if (!req_ctx->too_late) {
-                req_ctx->cb(ec, std::move(req_ctx->response));
+                _response = req_ctx->response.release();
+                req_ctx->cb(ec, std::move(_response));
             }
         } else {
-            _response = std::move(req_ctx->response);
+            _response = req_ctx->response.release();
         }
 
         std::lock_guard guard{_requests_mtx};

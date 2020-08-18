@@ -74,19 +74,20 @@ target_include_directories(beauty
 target_link_libraries(beauty
     PUBLIC
         OpenSSL::SSL
-        boost::boost
         ${CMAKE_DL_LIBS}
 )
 
 if(UNIX)
     target_link_libraries(beauty
         PUBLIC
+            Boost::system
             Threads::Threads
             stdc++fs
     )
 elseif(WIN32)
     target_link_libraries(beauty
         PUBLIC
+            boost::boost
             CRYPT32.LIB
     )
 endif()

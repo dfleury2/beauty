@@ -14,6 +14,7 @@ class response : public beast::http::response<beast::http::string_body>
 public:
     using beast::http::response<beast::http::string_body>::response;
     using beast::http::response<beast::http::string_body>::set;
+    using beast::http::response<beast::http::string_body>::operator=;
 
     void set(const beauty::header::content_type& ct) {
         set(beast::http::field::content_type, ct.value);

@@ -26,6 +26,14 @@ server::~server()
 server&
 server::listen(int port, const char* address)
 {
+    if (_app.is_stopped()) {
+        return *this;
+    }
+
+    if (!_app.is_started()) {
+        _app.start();
+    }
+
     auto ip_address = asio::ip::make_address(address);
 
     _endpoint = asio::ip::tcp::endpoint{ip_address, (unsigned short)port};
