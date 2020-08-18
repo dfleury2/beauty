@@ -23,4 +23,11 @@ foreach(source ${SOURCES})
         )
 
     target_link_libraries(${targetname} beauty::beauty)
+
+    if(WIN32)
+        set_target_properties(${targetname}
+            PROPERTIES
+                LINK_FLAGS "/ignore:4099"
+        )
+    endif()
 endforeach()
