@@ -104,9 +104,9 @@ acceptor::on_accept(boost::system::error_code ec)
     else {
         // Create the session SLL or not and run it
         if (_app.is_ssl_activated()) {
-            std::make_shared<session_https>(std::move(_socket), _router, _app.ssl_context())->run();
+            std::make_shared<session_https>(_app.ioc(), std::move(_socket), _router, _app.ssl_context())->run();
         } else {
-            std::make_shared<session_http>(std::move(_socket), _router)->run();
+            std::make_shared<session_http>(_app.ioc(), std::move(_socket), _router)->run();
         }
     }
 

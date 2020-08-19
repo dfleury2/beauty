@@ -3,6 +3,8 @@
 // Only there to split the client.cpp file
 // Should be included only there
 
+#include <boost/version.hpp>
+
 #include <deque>
 #include <atomic>
 
@@ -66,7 +68,11 @@ public:
             _ioc(ioc),
             _resolver(_ioc),
             _socket(_ioc),
-            _strand(_socket.get_executor())
+#if   (BOOST_VERSION == 107000)
+          _strand(asio::make_strand(ioc))
+#elif (BOOST_VERSION == 106700)
+          _strand(_socket.get_executor())
+#endif
     {}
 
     template<bool U = SSL, typename std::enable_if_t<U, int> = 0>
@@ -75,7 +81,11 @@ public:
             _resolver(_ioc),
             _socket(_ioc),
             _stream(ioc, ctx),
-            _strand(_socket.get_executor())
+#if   (BOOST_VERSION == 107000)
+          _strand(asio::make_strand(ioc))
+#elif (BOOST_VERSION == 106700)
+          _strand(_socket.get_executor())
+#endif
     {}
 
     ~session_client() {

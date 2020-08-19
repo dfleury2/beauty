@@ -31,17 +31,25 @@ public:
 
 public:
     template<bool U = SSL, typename std::enable_if_t<!U, int> = 0>
-    session(asio::ip::tcp::socket&& socket, const beauty::router& router) :
+    session(asio::io_context& ioc, asio::ip::tcp::socket&& socket, const beauty::router& router) :
           _socket(std::move(socket)),
+#if   (BOOST_VERSION == 107000)
+          _strand(asio::make_strand(ioc)),
+#elif (BOOST_VERSION == 106700)
           _strand(_socket.get_executor()),
+#endif
           _router(router)
     {}
 
     template<bool U = SSL, typename std::enable_if_t<U, int> = 0>
-    session(asio::ip::tcp::socket&& socket, const beauty::router& router, asio::ssl::context& ctx) :
+    session(asio::io_context& ioc, asio::ip::tcp::socket&& socket, const beauty::router& router, asio::ssl::context& ctx) :
           _socket(std::move(socket)),
           _stream(_socket, ctx),
+#if   (BOOST_VERSION == 107000)
+          _strand(asio::make_strand(ioc)),
+#elif (BOOST_VERSION == 106700)
           _strand(_socket.get_executor()),
+#endif
           _router(router)
     {}
 
