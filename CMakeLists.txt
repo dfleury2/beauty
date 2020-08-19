@@ -13,6 +13,7 @@ set(CMAKE_CXX_EXTENSION OFF)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME ON)
+# You should take care about which FindBoost.cmake is used...
 find_package(Boost REQUIRED COMPONENTS system)
 
 # Thread
