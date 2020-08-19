@@ -19,7 +19,7 @@ public:
     server(certificates&& c);
     ~server();
 
-    server& listen(int port = 0, const char* address = "0.0.0.0");
+    server& listen(int port = 0, const std::string& address = "0.0.0.0");
     void start(int concurrency = 2);
     void stop();
     void run();

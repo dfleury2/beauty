@@ -156,7 +156,7 @@ public:
             // Look up the domain name
             _resolver.async_resolve(
                 url.host(),
-                url.port(),
+                url.port_view(),
                 [me = this->shared_from_this()](const boost::system::error_code& ec,
                         asio::ip::tcp::resolver::results_type results) {
                     me->on_resolve(ec, results);

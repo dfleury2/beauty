@@ -66,29 +66,51 @@ public:
     // DELETE
     // ------
     client_response
-    del_before(const beauty::duration& d, const std::string& url);
-    void del_before(const beauty::duration& d, const std::string& url, client_cb&& cb);
+    del_before(const beauty::duration& d, const std::string& url, std::string&& body);
+    void del_before(const beauty::duration& d, const std::string& url, std::string&& body, client_cb&& cb);
+
+    client_response
+    del(const std::string& url, std::string&& body)
+    {
+        return del_before(std::chrono::milliseconds(0), url, std::move(body));
+    }
 
     client_response
     del(const std::string& url)
     {
-        return del_before(std::chrono::milliseconds(0), url);
+        return del_before(std::chrono::milliseconds(0), url, "");
+    }
+
+    client_response
+    del_before(double seconds, const std::string& url, std::string&& body)
+    {
+        return del_before(std::chrono::milliseconds((int)(seconds * 1000)), url, std::move(body));
     }
 
     client_response
     del_before(double seconds, const std::string& url)
     {
-        return del_before(std::chrono::milliseconds((int)(seconds * 1000)), url);
+        return del_before(std::chrono::milliseconds((int)(seconds * 1000)), url, "");
+    }
+
+    void del(const std::string& url, std::string&& body, client_cb&& cb)
+    {
+        del_before(std::chrono::milliseconds(0), url, std::move(body), std::move(cb));
     }
 
     void del(const std::string& url, client_cb&& cb)
     {
-        del_before(std::chrono::milliseconds(0), url, std::move(cb));
+        del_before(std::chrono::milliseconds(0), url, "", std::move(cb));
+    }
+
+    void del_before(double seconds, const std::string& url, std::string&& body, client_cb&& cb)
+    {
+        del_before(std::chrono::milliseconds((int)(seconds * 1000)), url, std::move(body), std::move(cb));
     }
 
     void del_before(double seconds, const std::string& url, client_cb&& cb)
     {
-        del_before(std::chrono::milliseconds((int)(seconds * 1000)), url, std::move(cb));
+        del_before(std::chrono::milliseconds((int)(seconds * 1000)), url, "", std::move(cb));
     }
 
     // ----

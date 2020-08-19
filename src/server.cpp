@@ -24,7 +24,7 @@ server::~server()
 
 // --------------------------------------------------------------------------
 server&
-server::listen(int port, const char* address)
+server::listen(int port, const std::string& address)
 {
     if (_app.is_stopped()) {
         return *this;

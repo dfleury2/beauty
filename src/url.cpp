@@ -3,6 +3,7 @@
 #include <beauty/utils.hpp>
 
 #include <iostream>
+#include <charconv>
 
 namespace {
 // --------------------------------------------------------------------------
@@ -46,7 +47,13 @@ url::url(std::string u) : _url(std::move(u))
     // [[login][:password]@]<host>[:port]
     auto [user_info, host] = split_pair(url_split[2], '@', false);
     std::tie(_login, _password) = split_pair(user_info, ':');
-    std::tie(_host, _port)      = split_pair(host, ':');
+    std::tie(_host, _port_view) = split_pair(host, ':');
+    if (_port_view.size()) {
+        auto[p, ec] = std::from_chars(&_port_view[0],&_port_view[0] + _port_view.size(), _port);
+        if (ec != std::errc()) {
+            throw std::runtime_error("Invalid port number " + std::string(_port_view));
+        }
+    }
 
     // [/path][?query]
     if (url_split.size() >= 3) {
