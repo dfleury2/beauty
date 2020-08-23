@@ -3,7 +3,17 @@ cmake_minimum_required(VERSION 3.6)
 project(Beauty)
 set(VERSION 0.1-rc)
 
-include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
+option(CONAN "Enable/disable Conan" ON)
+
+if (${CONAN})
+    include(${CMAKE_SOURCE_DIR}/cmake/conan.cmake)
+
+    conan_cmake_run(CONANFILE conanfile.py
+            PROFILE ${CONAN_PROFILE}
+            BASIC_SETUP CMAKE_TARGETS)
+
+    include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
+endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
