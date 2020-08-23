@@ -1,7 +1,7 @@
 <div align="center">
-  <img src="https://github.com/dfleury2/beauty/raw/master/docs/rose.png" height="180" />
+  <img alt="A Rose" src="https://github.com/dfleury2/beauty/raw/master/docs/rose.png" height="180" />
   <br>
-  <i>A simple Http server and client above <a href="https://github.com/boostorg/beast">Boost.Beast</a>
+  A simple Http server and client above <a href="https://github.com/boostorg/beast">Boost.Beast</a>
 </div>
 <br>
 
@@ -59,10 +59,14 @@ int main()
 
     // Check the result
     if (!ec) {
-        // Display the body received
-        std::cout << response.body() << std::endl;
-    } else {
-        // An error occured
+        if (response.is_status_ok()) {
+            // Display the body received
+            std::cout << response.body() << std::endl;
+        } else {
+            std::cout << response.status() << std::endl;
+        }   
+    } else if (!ec) {
+        // An error occurred
         std::cout << ec << ": " << ec.message() << std::endl;
     }
 }
