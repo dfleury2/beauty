@@ -10,7 +10,7 @@ class attributes
 {
 public:
     attributes() = default;
-    attributes(const std::string& str, char sep = '&');
+    explicit attributes(const std::string& str, char sep = '&');
 
     void insert(std::string key, std::string value);
 

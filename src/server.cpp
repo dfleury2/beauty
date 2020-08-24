@@ -1,9 +1,5 @@
 #include <beauty/server.hpp>
 
-#include <beauty/acceptor.hpp>
-#include <beauty/session.hpp>
-#include <beauty/application.hpp>
-
 namespace beauty
 {
 // --------------------------------------------------------------------------
@@ -71,49 +67,51 @@ server::stop()
 
 // --------------------------------------------------------------------------
 server&
-server::get(std::string path, route_cb&& cb)
+server::get(const std::string& path, route_cb&& cb)
 {
     _router.add_route(
             beast::http::verb::get,
-            beauty::route(std::move(path), std::move(cb)));
+            beauty::route(path, std::move(cb)));
     return *this;
 }
 
 // --------------------------------------------------------------------------
 server&
-server::put(std::string path, route_cb&& cb)
+server::put(const std::string& path, route_cb&& cb)
 {
     _router.add_route(
             beast::http::verb::put,
-            beauty::route(std::move(path), std::move(cb)));
+            beauty::route(path, std::move(cb)));
     return *this;
 }
 
 // --------------------------------------------------------------------------
 server&
-server::post(std::string path, route_cb&& cb)
+server::post(const std::string& path, route_cb&& cb)
 {
     _router.add_route(
             beast::http::verb::post,
-            beauty::route(std::move(path), std::move(cb)));
+            beauty::route(path, std::move(cb)));
     return *this;
 }
 
 // --------------------------------------------------------------------------
 server&
-server::options(std::string path, route_cb&& cb)
+server::options(const std::string& path, route_cb&& cb)
 {
     _router.add_route(
             beast::http::verb::options,
-            beauty::route(std::move(path), std::move(cb)));
+            beauty::route(path, std::move(cb)));
     return *this;
 }
 
 // --------------------------------------------------------------------------
 server&
-server::del(std::string path, route_cb&& cb)
+server::del(const std::string& path, route_cb&& cb)
 {
-    _router.add_route(beast::http::verb::delete_, beauty::route(std::move(path), std::move(cb)));
+    _router.add_route(
+            beast::http::verb::delete_,
+            beauty::route(path, std::move(cb)));
     return *this;
 }
 

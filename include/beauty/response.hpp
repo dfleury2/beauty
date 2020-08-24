@@ -8,6 +8,8 @@ namespace beast = boost::beast;
 
 namespace beauty
 {
+namespace http = beast::http;
+
 // --------------------------------------------------------------------------
 class response : public beast::http::response<beast::http::string_body>
 {
@@ -32,6 +34,10 @@ public:
     void on_done(std::function<void()>&& cb) {
         _cb = std::move(cb);
     }
+
+    // Result alias and a common helper for no error
+    http::status status() const { return result(); }
+    bool is_status_ok() const { return status() == http::status::ok; }
 
 private:
     bool    _is_postponed = false;

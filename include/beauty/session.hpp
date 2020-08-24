@@ -83,7 +83,7 @@ public:
     {
         //std::cout << "Wait for a request" << std::endl;
         // Make a new request_parser before reading
-        _request_parser.reset(new beast::http::request_parser<beast::http::string_body>());
+        _request_parser = std::make_unique<beast::http::request_parser<beast::http::string_body>>();
         _request_parser->body_limit(1024 * 1024 * 1024); // 1Go..
 
         // Read a full request (only if on _stream/_socket)
@@ -169,13 +169,13 @@ public:
 
         // Read another request
         //std::cout << "Read another request" << std::endl;
-        // Allow to stay alive the session in case of posponed response
+        // Allow to stay alive the session in case of postponed response
         do_read();
     }
 
     void do_close()
     {
-        //std::cout << "Shutdown the connecion" << std::endl;
+        //std::cout << "Shutdown the connection" << std::endl;
         if constexpr(SSL) {
             // Perform the SSL shutdown
             _stream.async_shutdown(

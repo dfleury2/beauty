@@ -16,7 +16,7 @@ class server
 {
 public:
     server();
-    server(certificates&& c);
+    explicit server(certificates&& c);
     ~server();
 
     server& listen(int port = 0, const std::string& address = "0.0.0.0");
@@ -24,11 +24,11 @@ public:
     void stop();
     void run();
 
-    server& get(std::string path, route_cb&& cb);
-    server& put(std::string path, route_cb&& cb);
-    server& post(std::string path, route_cb&& cb);
-    server& options(std::string path, route_cb&& cb);
-    server& del(std::string path, route_cb&& cb);
+    server& get(const std::string& path, route_cb&& cb);
+    server& put(const std::string& path, route_cb&& cb);
+    server& post(const std::string& path, route_cb&& cb);
+    server& options(const std::string& path, route_cb&& cb);
+    server& del(const std::string& path, route_cb&& cb);
 
     const asio::ip::tcp::endpoint& endpoint() const { return _endpoint; }
 

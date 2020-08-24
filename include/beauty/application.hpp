@@ -19,7 +19,7 @@ class timer;
 class application {
 public:
     application();
-    application(certificates&& c);
+    explicit application(certificates&& c);
 
     ~application();
 

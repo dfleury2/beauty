@@ -34,7 +34,7 @@ public:
 
 public:
     client() = default;
-    client(certificates&& c);
+    explicit client(certificates&& c);
 
     // ---
     // GET

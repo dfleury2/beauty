@@ -68,7 +68,7 @@ server_error(const request& req, const char* message)
     res->keep_alive(req.keep_alive());
     res->body() = std::string("An error occurred: '") + message + "'";
     return res;
-};
+}
 
 //---------------------------------------------------------------------------
 void

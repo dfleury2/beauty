@@ -12,7 +12,7 @@ route::route(const std::string& path, route_cb&& cb) :
     }
 
     for(auto&& p : split(path, '/')) {
-        _segments.push_back(std::string(p));
+        _segments.emplace_back(p);
     }
 }
 
@@ -34,7 +34,7 @@ route::match(beauty::request& req) const noexcept
         auto& request_segment = request_paths[i];
 
         if (segment[0] == ':') {
-            attrs += (attrs.size() ? "&":"")
+            attrs += (attrs.empty() ? "":"&")
                     + std::string(&segment[1], segment.size() - 1)
                     + "="
                     + std::string(request_segment);
@@ -43,7 +43,7 @@ route::match(beauty::request& req) const noexcept
         }
     }
 
-    if (attrs.size()) {
+    if (!attrs.empty()) {
         req.get_attributes() = attributes(attrs);
     }
     return true;

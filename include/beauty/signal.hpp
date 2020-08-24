@@ -26,9 +26,7 @@ private:
     signal_cb               _cb;
 };
 
-
 // --------------------------------------------------------------------------
 void signal(int s, signal_cb&& cb);
 void signal(std::initializer_list<int>&& signals, signal_cb&& cb);
-
 }

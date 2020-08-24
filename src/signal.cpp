@@ -62,5 +62,4 @@ signal(int s, signal_cb&& cb)
     signal({s}, std::move(cb));
 }
 
-
 }
