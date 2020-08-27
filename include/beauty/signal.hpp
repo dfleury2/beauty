@@ -15,7 +15,7 @@ using signal_cb = std::function<void(int signal)>;
 class signal_set : public std::enable_shared_from_this<signal_set>
 {
 public:
-    signal_set(signal_cb&& cb);
+    explicit signal_set(signal_cb&& cb);
 
     signal_set& add(int s);
     void run();

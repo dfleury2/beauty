@@ -1,7 +1,5 @@
 #include <beauty/timer.hpp>
 
-#include <iostream>
-
 namespace beauty
 {
 // --------------------------------------------------------------------------

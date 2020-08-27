@@ -104,7 +104,7 @@ public:
         }
     }
 
-    void on_read(boost::system::error_code ec, std::size_t bytes_transferred)
+    void on_read(boost::system::error_code ec, std::size_t /* bytes_transferred */ )
     {
         // This means they closed the connection
         if (ec == beast::http::error::end_of_stream) {
@@ -127,7 +127,7 @@ public:
         }
     }
 
-    void do_write(std::shared_ptr<response> response)
+    void do_write(const std::shared_ptr<response>& response)
     {
         response->prepare_payload();
 
@@ -155,7 +155,7 @@ public:
         }
     }
 
-    void on_write(boost::system::error_code ec, std::size_t bytes_transferred, bool close)
+    void on_write(boost::system::error_code ec, std::size_t /* bytes_transferred */, bool close)
     {
         if (ec) {
             return fail(ec, "write");
