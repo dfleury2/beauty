@@ -22,7 +22,7 @@ public:
 private:
     // Store all informations on a request
     struct request_context {
-        request_context(asio::io_context& ioc) :
+        explicit request_context(asio::io_context& ioc) :
             timer(ioc)
         {
             response.body_limit(1024 * 1024 * 1024); // 1Go
@@ -64,13 +64,13 @@ private:
 
 public:
     template<bool U = SSL, typename std::enable_if_t<!U, int> = 0>
-    session_client(asio::io_context& ioc) :
+    explicit session_client(asio::io_context& ioc) :
             _ioc(ioc),
             _resolver(_ioc),
             _socket(_ioc),
 #if   (BOOST_VERSION == 107000)
           _strand(asio::make_strand(ioc))
-#elif (BOOST_VERSION == 106700)
+#elif (BOOST_VERSION < 107000)
           _strand(_socket.get_executor())
 #endif
     {}
@@ -83,7 +83,7 @@ public:
             _stream(ioc, ctx),
 #if   (BOOST_VERSION == 107000)
           _strand(asio::make_strand(ioc))
-#elif (BOOST_VERSION == 106700)
+#elif (BOOST_VERSION < 107000)
           _strand(_socket.get_executor())
 #endif
     {}
@@ -361,7 +361,7 @@ private:
     std::atomic_bool        _pending_request{false};
 
 private:
-    void fail(const request_context& req_ctx, boost::system::error_code ec, const char* msg /* not used */) {
+    void fail(const request_context& req_ctx, boost::system::error_code ec, const char* /* msg not used */) {
         if (req_ctx.cb) {
             //std::cout << " !!! FAILED !!! " << ec << " with " << msg << std::endl;
             if (!req_ctx.too_late) {

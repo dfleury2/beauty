@@ -35,7 +35,7 @@ public:
           _socket(std::move(socket)),
 #if   (BOOST_VERSION == 107000)
           _strand(asio::make_strand(ioc)),
-#elif (BOOST_VERSION == 106700)
+#elif (BOOST_VERSION < 107000)
           _strand(_socket.get_executor()),
 #endif
           _router(router)
@@ -47,7 +47,7 @@ public:
           _stream(_socket, ctx),
 #if   (BOOST_VERSION == 107000)
           _strand(asio::make_strand(ioc)),
-#elif (BOOST_VERSION == 106700)
+#elif (BOOST_VERSION < 107000)
           _strand(_socket.get_executor()),
 #endif
           _router(router)
