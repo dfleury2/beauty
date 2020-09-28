@@ -138,9 +138,12 @@ Beauty depends Boost.Beast and OpenSsl. You can rely on Conan to get the package
 git clone https://github.com/dfleury2/beauty.git
 cd beauty
 mkdir build && cd build
-cmake ..
+cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build .
 ```
+
+replace `cmake .. -DCMAKE_BUILD_TYPE=Release` by `cmake .. -DCMAKE_BUILD_TYPE=Release -DCONAN_false`
+to not use Conan. Hope your the dependencies are found on your Linux.
 
 
 ### Windows
