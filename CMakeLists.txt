@@ -10,7 +10,7 @@ if (${CONAN})
 
     conan_cmake_run(CONANFILE conanfile.py
             PROFILE ${CONAN_PROFILE}
-            BASIC_SETUP CMAKE_TARGETS)
+            BASIC_SETUP CMAKE_TARGETS NO_OUTPUT_DIRS)
 
     include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 endif()
@@ -23,7 +23,8 @@ set(CMAKE_CXX_EXTENSION OFF)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME ON)
-# You should take care about which FindBoost.cmake is used...
+
+set(BOOST_ROOT ${CONAN_BOOST_ROOT})
 find_package(Boost REQUIRED COMPONENTS system)
 
 # Thread

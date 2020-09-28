@@ -46,8 +46,8 @@ int main(int argc, char* argv[])
             res.set(beauty::content_type::image_x_icon);
             res.body() = read_file_content(doc_root / dirname / filename);
         })
-     .listen(port, address)
-     .start(threads);
+     .concurrency(threads)
+     .listen(port, address);
 
     beauty::run();
 }

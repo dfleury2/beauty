@@ -41,8 +41,8 @@ int main(int argc, char* argv[])
             res.set(beauty::content_type::image_x_icon);
             res.body() = debian_ico;
         })
+     .concurrency(threads)
      .listen(port, address)
-     .start(threads);
     ;
 
     std::cout << "Waiting a bit" << std::flush;

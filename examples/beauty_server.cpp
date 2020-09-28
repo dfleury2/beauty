@@ -50,8 +50,8 @@ int main(int argc, char* argv[])
             // res.set_header(beast::http::field::content_type, beauty::content_type::image_x_icon.value);
             res.body() = read_file_content(doc_root / dirname / filename, true);
         })
-     .listen(port, address)
-     .start(threads);
+     .concurrency(threads)
+     .listen(port, address);
 
     beauty::run();
 

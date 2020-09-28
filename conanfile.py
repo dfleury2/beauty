@@ -10,9 +10,9 @@ class BeautyConan(ConanFile):
     settings        = "os", "compiler", "build_type", "arch"
     options         = {"shared": [True, False]}
     default_options = "shared=False"
-    generators      = "cmake_find_package", "cmake_paths"
+    generators      = "cmake_paths"
 
-    requires        = ("boost/1.67.0@conan/stable",
+    requires        = ("boost/1.69.0@",
                        "openssl/1.1.1g@")
 
     exports_sources = "*", "!build"

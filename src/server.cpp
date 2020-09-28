@@ -19,15 +19,11 @@ server::~server()
 }
 
 // --------------------------------------------------------------------------
-server&
+void
 server::listen(int port, const std::string& address)
 {
-    if (_app.is_stopped()) {
-        return *this;
-    }
-
     if (!_app.is_started()) {
-        _app.start();
+        _app.start(_concurrency);
     }
 
     auto ip_address = asio::ip::make_address(address);
@@ -37,22 +33,6 @@ server::listen(int port, const std::string& address)
     // Create and launch a listening port
     _acceptor = std::make_shared<beauty::acceptor>(_app, _endpoint, _router);
     _acceptor->run();
-
-    return *this;
-}
-
-// --------------------------------------------------------------------------
-void
-server::start(int concurrency)
-{
-    _app.start(concurrency);
-}
-
-// --------------------------------------------------------------------------
-void
-server::run()
-{
-    _app.run();
 }
 
 // --------------------------------------------------------------------------
@@ -63,6 +43,13 @@ server::stop()
         _acceptor->stop();
     }
     _app.stop();
+}
+
+// --------------------------------------------------------------------------
+void
+server::run()
+{
+    _app.run();
 }
 
 // --------------------------------------------------------------------------

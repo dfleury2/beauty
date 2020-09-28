@@ -19,21 +19,22 @@ public:
     explicit server(certificates&& c);
     ~server();
 
-    server& listen(int port = 0, const std::string& address = "0.0.0.0");
-    void start(int concurrency = 2);
-    void stop();
-    void run();
-
+    server& concurrency(int concurrency) { _concurrency = concurrency; return *this; }
     server& get(const std::string& path, route_cb&& cb);
     server& put(const std::string& path, route_cb&& cb);
     server& post(const std::string& path, route_cb&& cb);
     server& options(const std::string& path, route_cb&& cb);
     server& del(const std::string& path, route_cb&& cb);
 
+    void listen(int port = 0, const std::string& address = "0.0.0.0");
+    void stop();
+    void run();
+
     const asio::ip::tcp::endpoint& endpoint() const { return _endpoint; }
 
 private:
     beauty::application&    _app;
+    int                     _concurrency{1};
     beauty::router          _router;
     std::shared_ptr<beauty::acceptor> _acceptor;
 

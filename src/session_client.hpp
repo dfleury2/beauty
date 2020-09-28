@@ -68,10 +68,10 @@ public:
             _ioc(ioc),
             _resolver(_ioc),
             _socket(_ioc),
-#if   (BOOST_VERSION == 107000)
-          _strand(asio::make_strand(ioc))
-#elif (BOOST_VERSION < 107000)
+#if   (BOOST_VERSION < 107000)
           _strand(_socket.get_executor())
+#else
+          _strand(asio::make_strand(ioc))
 #endif
     {}
 
@@ -81,10 +81,10 @@ public:
             _resolver(_ioc),
             _socket(_ioc),
             _stream(ioc, ctx),
-#if   (BOOST_VERSION == 107000)
-          _strand(asio::make_strand(ioc))
-#elif (BOOST_VERSION < 107000)
+#if   (BOOST_VERSION < 107000)
           _strand(_socket.get_executor())
+#else
+          _strand(asio::make_strand(ioc))
 #endif
     {}
 
