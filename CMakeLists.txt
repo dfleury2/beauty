@@ -10,7 +10,7 @@ if (${CONAN})
 
     conan_cmake_run(CONANFILE conanfile.py
             PROFILE ${CONAN_PROFILE}
-            BASIC_SETUP CMAKE_TARGETS NO_OUTPUT_DIRS)
+            BASIC_SETUP CMAKE_TARGETS)
 
     include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 endif()
