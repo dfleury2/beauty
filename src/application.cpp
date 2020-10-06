@@ -34,7 +34,7 @@ application::application(certificates&& c) :
 // --------------------------------------------------------------------------
 application::~application()
 {
-    stop();
+    stop(false);
 }
 
 // --------------------------------------------------------------------------
@@ -47,6 +47,8 @@ application::start(int concurrency)
     }
 
     if (is_stopped()) {
+        // The application was started before, we need
+        // to restart the ioc cleanly
         _ioc.restart();
     }
     _state = State::started;
@@ -77,12 +79,16 @@ application::start(int concurrency)
 void
 application::stop(bool reset)
 {
+    if (is_stopped()) {
+        return;
+    }
     _state = State::stopped;
 
     if (reset) {
         for(auto&& t : timers) {
             t->stop();
         }
+        timers.clear();
     }
 
     _ioc.stop();

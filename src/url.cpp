@@ -19,7 +19,7 @@ split_pair(const std::string_view& view, char sep, bool mandatory_left = true)
         tmp.first   = pair_split[0];
         tmp.second  = pair_split[1];
     } else {
-        throw std::runtime_error("Invalid URL format");
+        throw std::runtime_error("Invalid URL format for [" + std::string(view) + "]");
     }
 
     return tmp;
@@ -38,7 +38,7 @@ url::url(std::string u) : _url(std::move(u))
     if (url_split.size() < 3 ||
             url_split[1].size() ||
             url_split[2].empty()) {
-        throw std::runtime_error("Invalid URL format");
+        throw std::runtime_error("Invalid URL format for [" + _url + "]");
     }
 
     // <scheme>:
