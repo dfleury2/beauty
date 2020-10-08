@@ -19,7 +19,7 @@ Beauty is a layer above <a href="https://github.com/boostorg/beast">Boost.Beast<
 
 ## Examples
 
-- a synchronous server
+- a server
 
 ```cpp
 #include <beauty/beauty.hpp>
@@ -32,14 +32,21 @@ int main()
     // Add a default '/' route
     server.get("/", [](const auto& req, auto& res) {
         res.body() = "It's work ;) ... it works! :)";
-    })
+    });
+
+    // Add a '/person/:id' route
+    server.get("/person/:id", [](const auto& req, auto& res) {
+        auto& id = req.a("id");
+        res.body() = "You asked for the person id: " + id;
+    });
 
     // Open the listening port
-    server.listen(8085)
+    server.listen(8085);
 
-    // Run the event loop - no additional thread
+    // Run the event loop - Warning, add a new thread (to be updated may be)
     server.run();
 }
+
 ```
 
 - a synchronous client
@@ -70,6 +77,45 @@ int main()
         std::cout << ec << ": " << ec.message() << std::endl;
     }
 }
+```
+- an asynchronous client
+
+```cpp
+#include <beauty/beauty.hpp>
+
+#include <iostream>
+#include <chrono>
+
+int main()
+{
+    // Create a client
+    beauty::client client;
+
+    // Request an URL
+    client.get("http://127.0.0.1:8085",
+               [](auto ec, auto&& response) {
+                   // Check the result
+                   if (!ec) {
+                       if (response.is_status_ok()) {
+                           // Display the body received
+                           std::cout << response.body() << std::endl;
+                       } else {
+                           std::cout << response.status() << std::endl;
+                       }
+                   } else if (!ec) {
+                       // An error occurred
+                       std::cout << ec << ": " << ec.message() << std::endl;
+                   }
+               });
+
+    // Need to wait a little bit to received the response
+    for (int i = 0; i < 10; ++i) {
+        std::cout << '.'; std::cout.flush();
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+    std::cout << std::endl;
+}
+
 ```
 
 - timers

@@ -51,7 +51,7 @@ class session : public std::enable_shared_from_this<session>
     int _count = 0;
     int _step = 0;
     int _sent = 0;
-    
+
     high_resolution_clock::time_point _start;
 
 public:
@@ -61,7 +61,7 @@ public:
         : resolver_(ioc)
         , socket_(ioc)
     {}
-    
+
     ~session() {
         // Gracefully close the socket
         boost::system::error_code ec;
@@ -74,7 +74,7 @@ public:
 
         // If we get here then the connection is closed gracefully
     }
-        
+
 
     // Start the asynchronous operation
     void
@@ -91,7 +91,7 @@ public:
         req_.target(target);
         req_.set(http::field::host, host);
         req_.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
-        
+
         _count = count;
         _step = std::max(_count / 10, 1);
 
@@ -132,7 +132,7 @@ public:
             return fail(ec, "connect");
 
         _start = high_resolution_clock::now();
-        
+
         // Send the HTTP request to the remote host
         http::async_write(socket_, req_,
             std::bind(
@@ -151,9 +151,9 @@ public:
 
         if(ec)
             return fail(ec, "write");
-        
+
         res_ = {};
-        
+
         // Receive the HTTP response
         http::async_read(socket_, buffer_, res_,
             std::bind(
@@ -188,9 +188,9 @@ public:
         }
         if (!(_count % _step)) {
             auto stop = high_resolution_clock::now();
-            
+
             auto delay = duration_cast<duration<double>>(stop - _start).count();
-            
+
             std::cout << _count << " left, "
                     << (int)(_sent / delay ) << " #/s"
                     << std::endl;
@@ -199,7 +199,6 @@ public:
 };
 
 //------------------------------------------------------------------------------
-
 int main(int argc, char** argv)
 {
     // Check command line arguments.
