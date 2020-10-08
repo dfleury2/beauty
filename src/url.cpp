@@ -46,8 +46,12 @@ url::url(std::string u) : _url(std::move(u))
 
     // [[login][:password]@]<host>[:port]
     auto [user_info, host] = split_pair(url_split[2], '@', false);
-    std::tie(_login, _password) = split_pair(user_info, ':');
-    std::tie(_host, _port_view) = split_pair(host, ':');
+    if (user_info.size()) {
+        std::tie(_login, _password) = split_pair(user_info, ':');
+    }
+    if (host.size()) {
+        std::tie(_host, _port_view) = split_pair(host, ':');
+    }
     if (_port_view.size()) {
         auto[p, ec] = std::from_chars(&_port_view[0],&_port_view[0] + _port_view.size(), _port);
         if (ec != std::errc()) {
