@@ -3,6 +3,7 @@
 #include <beauty/router.hpp>
 #include <beauty/version.hpp>
 #include <beauty/utils.hpp>
+#include <beauty/exception.hpp>
 
 #include <boost/beast.hpp>
 #include <boost/asio.hpp>
@@ -213,6 +214,7 @@ private:
     {
         // Make sure we can handle the method
         _request = _request_parser->release();
+        _request.remote(_socket.remote_endpoint());
 
         auto found_method = _router.find(_request.method());
         if (found_method == _router.end()) {
@@ -231,6 +233,9 @@ private:
                     route.execute(_request, *res); // Call the route user handler
 
                     return res;
+                }
+                catch(const beauty::exception& ex) {
+                    return ex.create_response(_request);
                 }
                 catch(const std::exception& ex) {
                     return server_error(_request, ex.what());

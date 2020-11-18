@@ -172,14 +172,6 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
 
         _url = beauty::url(url);
 
-        auto on_error_cb = [this, local_cb = std::move(cb)](const boost::system::error_code& ec, beauty::response&& response) {
-            local_cb(ec, std::move(response));
-            if (ec) {
-                _session_https.reset();
-                _session_http.reset();
-            }
-        };
-
         if (beauty::application::Instance().is_ssl_activated()) {
             if (!_session_https) {
                 // Create the session on first call...
@@ -188,7 +180,7 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
                         beauty::application::Instance().ssl_context());
             }
 
-            _session_https->run(std::move(req), _url, d, std::move(on_error_cb));
+            _session_https->run(std::move(req), _url, d, std::move(cb));
         }
         else {
             if (!_session_http) {
@@ -197,7 +189,7 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
                         beauty::application::Instance().ioc());
             }
 
-            _session_http->run(std::move(req), _url, d, std::move(on_error_cb));
+            _session_http->run(std::move(req), _url, d, std::move(cb));
         }
     }
     catch(const boost::system::system_error& ex) {

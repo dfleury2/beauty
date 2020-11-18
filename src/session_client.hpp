@@ -4,9 +4,12 @@
 // Should be included only there
 
 #include <boost/version.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/ssl.hpp>
 
 #include <deque>
 #include <atomic>
+#include <memory>
 
 namespace beauty
 {

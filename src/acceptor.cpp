@@ -8,7 +8,7 @@ namespace beauty {
 //---------------------------------------------------------------------------
 acceptor::acceptor(
     application& app,
-    asio::ip::tcp::endpoint& endpoint,
+    beauty::endpoint& endpoint,
     const beauty::router& router) :
             _app(app),
             _acceptor(app.ioc()),

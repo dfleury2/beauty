@@ -32,9 +32,9 @@ int main(int argc, char* argv[])
             res.body() = file_index_html;
         });
 
-    // Listen
+    // Listen - will start a thread in the app automatically
     server.listen(8085);
 
-    // Run the event loop
-    server.run();
+    // Wait for the server to stop - no additional loop
+    server.wait();
 }

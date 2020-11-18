@@ -23,6 +23,11 @@ public:
 
     ~application();
 
+    application(const application&) = delete;
+    application& operator=(const application&) = delete;
+    application(application&&) = delete;
+    application& operator=(application&&) = delete;
+
     // Start the thread pool, running the event loop, not blocking
     void start(int concurrency = 1);
 
@@ -34,6 +39,11 @@ public:
 
     // Run the event loop in the current thread, blocking
     void run();
+
+    // Wait for the application to be stopped, blocking
+    void wait();
+
+    void post(std::function<void()>);
 
     asio::io_context& ioc() { return _ioc; }
     asio::ssl::context& ssl_context() { return _ssl_context; }
@@ -67,5 +77,7 @@ private:
 void start(int concurrency = 1);
 bool is_started();
 void run();
+void wait();
 void stop();
+void post(std::function<void()>);
 }

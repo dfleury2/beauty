@@ -28,7 +28,7 @@ server::listen(int port, const std::string& address)
 
     auto ip_address = asio::ip::make_address(address);
 
-    _endpoint = asio::ip::tcp::endpoint{ip_address, (unsigned short)port};
+    _endpoint = beauty::endpoint{ip_address, (unsigned short)port};
 
     // Create and launch a listening port
     _acceptor = std::make_shared<beauty::acceptor>(_app, _endpoint, _router);
@@ -50,6 +50,13 @@ void
 server::run()
 {
     _app.run();
+}
+
+// --------------------------------------------------------------------------
+void
+server::wait()
+{
+    _app.wait();
 }
 
 // --------------------------------------------------------------------------

@@ -4,6 +4,7 @@
 #include <beauty/version.hpp>
 
 #include <iostream>
+#include <regex>
 
 namespace http = boost::beast::http;
 
@@ -29,6 +30,11 @@ split(const T& str, char sep)
 
     return columns;
 }
+
+inline
+unsigned char
+hexdigit_to_num(unsigned char c)
+{ return (c < 'A' ? c - '0' : toupper(c) - 'A' + 10); }
 
 }
 
@@ -90,6 +96,76 @@ std::vector<std::string_view>
 split(const std::string_view& str_view, char sep)
 {
     return ::split<std::string_view>(str_view, sep);
+}
+
+//---------------------------------------------------------------------------
+std::string
+escape(const std::string& s)
+{
+    static const char* dec2hex = "0123456789ABCDEF";
+    static std::regex unsafe("[^A-Za-z0-9\\-\\._~]");
+
+    std::string escaped;
+    auto cur = std::sregex_token_iterator(s.begin(), s.end(), unsafe);
+    auto end = std::sregex_token_iterator();
+    auto vbegin = s.begin();
+
+    for ( ; cur != end; ++cur) {
+        // Append valid chars
+        escaped.append(vbegin, cur->first);
+
+        for (auto it = cur->first; it != cur->second; ++it) {
+            auto c = (unsigned char) ::toupper(*it);
+
+            escaped += '%';
+            escaped += dec2hex[c >> 4];
+            escaped += dec2hex[c & 0x0F];
+        }
+
+        vbegin = cur->second;
+    }
+
+    escaped.append(vbegin, s.end());
+
+    return escaped;
+}
+
+//---------------------------------------------------------------------------
+std::string
+unescape(const std::string& s)
+{
+    static std::regex escaped("%([0-9A-Fa-f]{2})");
+
+    // Support urlencoded '+' --> ' '
+    std::string t = std::regex_replace(s,
+                                       std::regex("\\+"),
+                                       " ");
+
+    std::string unescaped;
+    auto cur = std::sregex_token_iterator(t.begin(), t.end(), escaped);
+    auto end = std::sregex_token_iterator();
+    auto vbegin = t.cbegin();
+
+    for ( ; cur != end; ++cur) {
+        auto it = cur->first;
+
+        // Append unescaped chars
+        unescaped.append(vbegin, it);
+
+        // Skip percent
+        ++it;
+
+        auto c = hexdigit_to_num(*it++) << 4;
+        c |= hexdigit_to_num(*it++);
+
+        unescaped += c;
+
+        vbegin = cur->second;
+    }
+
+    unescaped.append(vbegin, t.cend());
+
+    return unescaped;
 }
 
 }

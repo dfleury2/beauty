@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
     app.start(threads);
     beauty::router router;
 
-    asio::ip::tcp::endpoint ep{address, port};
+    beauty::endpoint ep{address, port};
 
     // Create and launch a listening port
     std::make_shared<beauty::acceptor>(app, ep, router)->run();

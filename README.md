@@ -42,9 +42,10 @@ int main()
 
     // Open the listening port
     server.listen(8085);
+        // Listen will automatically start the loop in a separate thread
 
-    // Run the event loop - Warning, add a new thread (to be updated may be)
-    server.run();
+    // Wait for the server to stop
+    server.wait();
 }
 
 ```
@@ -143,7 +144,7 @@ int main()
     });
 
     // Wait for the end
-    beauty::run();
+    beauty::wait();
 }
 ```
 
@@ -168,7 +169,7 @@ int main()
     });
 
     // Wait for the end
-    beauty::run();
+    beauty::wait();
 }
 ```
 

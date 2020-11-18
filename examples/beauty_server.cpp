@@ -53,6 +53,6 @@ int main(int argc, char* argv[])
      .concurrency(threads)
      .listen(port, address);
 
-    beauty::run();
+    beauty::wait();
 
 }

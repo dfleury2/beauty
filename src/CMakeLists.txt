@@ -6,6 +6,7 @@ add_library(beauty
     ../include/beauty/beauty.hpp
     ../include/beauty/certificate.hpp
     ../include/beauty/client.hpp
+    ../include/beauty/exception.hpp
     ../include/beauty/header.hpp
     ../include/beauty/request.hpp
     ../include/beauty/response.hpp
@@ -21,6 +22,7 @@ add_library(beauty
     ./application.cpp
     ./attributes.cpp
     ./client.cpp
+    ./exception.cpp
     ./route.cpp
     ./server.cpp
     ./session_client.hpp

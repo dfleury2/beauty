@@ -113,6 +113,22 @@ application::run()
 
 // --------------------------------------------------------------------------
 void
+application::wait()
+{
+    while(!is_stopped()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(25));
+    }
+}
+
+// --------------------------------------------------------------------------
+void
+application::post(std::function<void()> fct)
+{
+    boost::asio::post(_ioc.get_executor(), std::move(fct));
+}
+
+// --------------------------------------------------------------------------
+void
 application::load_server_certificates()
 {
     if (_certificates->password.size()) {
@@ -183,9 +199,23 @@ run()
 
 // --------------------------------------------------------------------------
 void
+wait()
+{
+    application::Instance().wait();
+}
+
+// --------------------------------------------------------------------------
+void
 stop()
 {
     application::Instance().stop();
+}
+
+// --------------------------------------------------------------------------
+void
+post(std::function<void()> fct)
+{
+    application::Instance().post(std::move(fct));
 }
 
 // --------------------------------------------------------------------------

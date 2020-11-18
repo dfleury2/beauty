@@ -2,6 +2,7 @@
 
 #include <beauty/application.hpp>
 #include <beauty/router.hpp>
+#include <beauty/endpoint.hpp>
 
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
@@ -19,7 +20,7 @@ class acceptor : public std::enable_shared_from_this<acceptor>
 {
 public:
     acceptor(application& app,
-        asio::ip::tcp::endpoint& endpoint,
+        beauty::endpoint& endpoint,
         const beauty::router& router);
 
     ~acceptor();

@@ -11,4 +11,6 @@
 #include <beauty/session.hpp>
 #include <beauty/timer.hpp>
 #include <beauty/url.hpp>
+#include <beauty/base64.hpp>
+
 

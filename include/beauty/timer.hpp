@@ -23,9 +23,9 @@ public:
         _duration(d)
     {
         if constexpr(std::is_same_v<decltype(cb()), bool>) {
-            _cb = std::move(cb);
+            _cb = std::forward<Callback>(cb);
         } else {
-            _cb = [c = std::move(cb), repeat]() {
+            _cb = [c = std::forward<Callback>(cb), repeat]() {
                     c();
                     return repeat;
                };
@@ -46,25 +46,25 @@ private:
 template<typename Callback>
 void after(const duration& d, Callback&& cb, bool repeat = false)
 {
-    std::make_shared<beauty::timer>(d, std::move(cb), repeat)->run();
+    std::make_shared<beauty::timer>(d, std::forward<Callback>(cb), repeat)->run();
 }
 
 template<typename Callback>
 void after(double seconds, Callback&& cb, bool repeat = false)
 {
-    after(std::chrono::milliseconds((int)(seconds * 1000)), std::move(cb), repeat);
+    after(std::chrono::milliseconds((int)(seconds * 1000)), std::forward<Callback>(cb), repeat);
 }
 
 template<typename Callback>
 void repeat(const duration& d, Callback&& cb)
 {
-    after(d, std::move(cb), true);
+    after(d, std::forward<Callback>(cb), true);
 }
 
 template<typename Callback>
 void repeat(double seconds, Callback&& cb)
 {
-    after(seconds, std::move(cb), true);
+    after(seconds, std::forward<Callback>(cb), true);
 }
 
 }

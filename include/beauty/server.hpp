@@ -4,8 +4,7 @@
 #include <beauty/route.hpp>
 #include <beauty/router.hpp>
 #include <beauty/acceptor.hpp>
-
-#include <boost/asio.hpp>
+#include <beauty/endpoint.hpp>
 
 #include <string>
 
@@ -19,6 +18,12 @@ public:
     explicit server(certificates&& c);
     ~server();
 
+    server(const server&) = delete;
+    server& operator=(const server&) = delete;
+
+    server(server&&) = default;
+    server& operator=(server&&) = default;
+
     server& concurrency(int concurrency) { _concurrency = concurrency; return *this; }
     server& get(const std::string& path, route_cb&& cb);
     server& put(const std::string& path, route_cb&& cb);
@@ -29,8 +34,10 @@ public:
     void listen(int port = 0, const std::string& address = "0.0.0.0");
     void stop();
     void run();
+    void wait();
 
-    const asio::ip::tcp::endpoint& endpoint() const { return _endpoint; }
+    const beauty::endpoint& endpoint() const { return _endpoint; }
+    int port() const { return endpoint().port(); }
 
 private:
     beauty::application&    _app;
@@ -38,7 +45,7 @@ private:
     beauty::router          _router;
     std::shared_ptr<beauty::acceptor> _acceptor;
 
-    asio::ip::tcp::endpoint _endpoint;
+    beauty::endpoint        _endpoint;
 };
 
 }

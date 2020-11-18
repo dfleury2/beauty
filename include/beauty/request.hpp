@@ -3,6 +3,7 @@
 #include <beauty/attributes.hpp>
 
 #include <boost/beast/http.hpp>
+#include "endpoint.hpp"
 
 namespace beast = boost::beast;
 
@@ -18,8 +19,12 @@ public:
     attributes& get_attributes() { return _attributes; }
     const std::string& a(const std::string& key) const { return _attributes[key]; }
 
+    const beauty::endpoint& remote() const { return _remote_ep; }
+    void remote(beauty::endpoint ep) { _remote_ep = std::move(ep); }
+
 private:
     beauty::attributes  _attributes;
+    beauty::endpoint    _remote_ep;
 };
 
 }
