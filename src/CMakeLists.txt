@@ -37,7 +37,6 @@ add_library(beauty::beauty ALIAS beauty)
 set_target_properties(beauty
     PROPERTIES
         POSITION_INDEPENDENT_CODE ON
-        CXX_STANDARD 20
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
@@ -75,21 +74,20 @@ target_include_directories(beauty
 
 target_link_libraries(beauty
     PUBLIC
-        OpenSSL::SSL
+        CONAN_PKG::boost
+        CONAN_PKG::openssl
         ${CMAKE_DL_LIBS}
 )
 
 if(UNIX)
     target_link_libraries(beauty
         PUBLIC
-            Boost::system
             Threads::Threads
             stdc++fs
     )
 elseif(WIN32)
     target_link_libraries(beauty
         PUBLIC
-            boost::boost
             CRYPT32.LIB
     )
 endif()

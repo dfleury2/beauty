@@ -4,6 +4,7 @@
 
 int main()
 {
+#ifndef WIN32
     // Catch the small signals
     beauty::signal({SIGUSR1, SIGUSR2}, [](int s) {
         std::cout << "Shot miss..." << std::endl;
@@ -17,4 +18,5 @@ int main()
 
     // Wait for the end
     beauty::wait();
+#endif
 }
