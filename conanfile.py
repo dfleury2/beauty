@@ -12,7 +12,7 @@ class BeautyConan(ConanFile):
     default_options = "shared=False"
     generators      = "cmake_paths"
 
-    requires        = ("boost/1.74.0@",
+    requires        = ("boost/1.69.0@",
                        "openssl/1.1.1g@")
 
     exports_sources = "*", "!build"

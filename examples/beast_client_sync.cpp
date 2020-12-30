@@ -68,7 +68,7 @@ int main(int argc, char** argv)
         boost::asio::connect(socket, results.begin(), results.end());
 
         auto start = high_resolution_clock::now();
-        
+
         // Set up an HTTP GET request message
         http::request<http::string_body> req{http::verb::get, target, version};
         req.set(http::field::host, host);
@@ -88,7 +88,7 @@ int main(int argc, char** argv)
             http::read(socket, buffer, res);
 
             // Write the message to standard out
-            //std::cout << res << std::endl;
+            std::cout << res << std::endl;
             ++sent;
 
             if (!(count % step)) {
@@ -100,7 +100,7 @@ int main(int argc, char** argv)
                         << (int)(sent / delay ) << " #/s"
                         << std::endl;
             }
-            
+
         }
 
         // Gracefully close the socket
