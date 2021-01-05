@@ -64,8 +64,8 @@ private:
     std::vector<std::thread>    _threads;
 
     enum class State { waiting, started, stopped };
-    std::atomic<State> _state; // Three State allows a good ioc.restart
-    std::atomic<int>   _active_threads; // std::barrier in C++20
+    std::atomic<State> _state{State::waiting}; // Three State allows a good ioc.restart
+    std::atomic<int>   _active_threads{0}; // std::barrier in C++20
 
 private:
     void load_server_certificates();

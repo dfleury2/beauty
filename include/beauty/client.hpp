@@ -70,27 +70,15 @@ public:
     void del_before(const beauty::duration& d, const std::string& url, std::string&& body, client_cb&& cb);
 
     client_response
-    del(const std::string& url, std::string&& body)
+    del(const std::string& url, std::string&& body = "")
     {
         return del_before(std::chrono::milliseconds(0), url, std::move(body));
     }
 
     client_response
-    del(const std::string& url)
-    {
-        return del_before(std::chrono::milliseconds(0), url, "");
-    }
-
-    client_response
-    del_before(double seconds, const std::string& url, std::string&& body)
+    del_before(double seconds, const std::string& url, std::string&& body = "")
     {
         return del_before(std::chrono::milliseconds((int)(seconds * 1000)), url, std::move(body));
-    }
-
-    client_response
-    del_before(double seconds, const std::string& url)
-    {
-        return del_before(std::chrono::milliseconds((int)(seconds * 1000)), url, "");
     }
 
     void del(const std::string& url, std::string&& body, client_cb&& cb)
@@ -121,7 +109,7 @@ public:
     void post_before(const beauty::duration& d, const std::string& url, std::string&& body, client_cb&& cb);
 
     client_response
-    post(const std::string& url, std::string&& body)
+    post(const std::string& url, std::string&& body = "")
     {
         return post_before(std::chrono::milliseconds(0), url, std::move(body));
     }
@@ -131,8 +119,13 @@ public:
         post_before(std::chrono::milliseconds(0), url, std::move(body), std::move(cb));
     }
 
+    void post(const std::string& url, client_cb&& cb)
+    {
+        post_before(std::chrono::milliseconds(0), url, "", std::move(cb));
+    }
+
     client_response
-    post_before(double seconds, const std::string& url, std::string&& body)
+    post_before(double seconds, const std::string& url, std::string&& body = "")
     {
         return post_before(std::chrono::milliseconds((int)(seconds * 1000)), url, std::move(body));
     }
@@ -140,6 +133,11 @@ public:
     void post_before(double seconds, const std::string& url, std::string&& body, client_cb&& cb)
     {
         post_before(std::chrono::milliseconds((int)(seconds * 1000)), url, std::move(body), std::move(cb));
+    }
+
+    void post_before(double seconds, const std::string& url, client_cb&& cb)
+    {
+        post_before(std::chrono::milliseconds((int)(seconds * 1000)), url, "", std::move(cb));
     }
 
     // ---

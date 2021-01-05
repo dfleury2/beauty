@@ -82,7 +82,7 @@ public:
 
     void do_read()
     {
-        //std::cout << "Wait for a request" << std::endl;
+        //std::cout << "session: do read" << std::endl;
         // Make a new request_parser before reading
         _request_parser = std::make_unique<beast::http::request_parser<beast::http::string_body>>();
         _request_parser->body_limit(1024 * 1024 * 1024); // 1Go..
@@ -107,6 +107,8 @@ public:
 
     void on_read(boost::system::error_code ec, std::size_t /* bytes_transferred */ )
     {
+        //std::cout << "session: on read" << std::endl;
+
         // This means they closed the connection
         if (ec == beast::http::error::end_of_stream) {
             return do_close();
@@ -130,6 +132,7 @@ public:
 
     void do_write(const std::shared_ptr<response>& response)
     {
+        //std::cout << "session: do write" << std::endl;
         response->prepare_payload();
 
         // Write the response
@@ -158,6 +161,7 @@ public:
 
     void on_write(boost::system::error_code ec, std::size_t /* bytes_transferred */, bool close)
     {
+        //std::cout << "session: do write" << std::endl;
         if (ec) {
             return fail(ec, "write");
         }
@@ -169,14 +173,14 @@ public:
         }
 
         // Read another request
-        //std::cout << "Read another request" << std::endl;
+        //std::cout << "session: Read another request" << std::endl;
         // Allow to stay alive the session in case of postponed response
         do_read();
     }
 
     void do_close()
     {
-        //std::cout << "Shutdown the connection" << std::endl;
+        //std::cout << "session: do close, Shutdown the connection" << std::endl;
         if constexpr(SSL) {
             // Perform the SSL shutdown
             _stream.async_shutdown(

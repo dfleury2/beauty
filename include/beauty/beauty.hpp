@@ -7,6 +7,7 @@
 #include <beauty/request.hpp>
 #include <beauty/response.hpp>
 #include <beauty/signal.hpp>
+#include <beauty/swagger.hpp>
 #include <beauty/server.hpp>
 #include <beauty/session.hpp>
 #include <beauty/timer.hpp>

@@ -15,6 +15,7 @@ add_library(beauty
     ../include/beauty/server.hpp
     ../include/beauty/session.hpp
     ../include/beauty/signal.hpp
+    ../include/beauty/swagger.hpp
     ../include/beauty/timer.hpp
     ../include/beauty/url.hpp
     ../include/beauty/utils.hpp
@@ -27,6 +28,7 @@ add_library(beauty
     ./server.cpp
     ./session_client.hpp
     ./signal.cpp
+    ./swagger.cpp
     ./timer.cpp
     ./url.cpp
     ./utils.cpp

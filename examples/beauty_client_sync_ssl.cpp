@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
             total_bytes += response.body().size();
 
             if (count == 1) {
-                std::cout << "[" << response.body().substr(0, 80) << "]" << std::endl;
+                std::cout << "[" << response.body().substr(0, 256) << "]" << std::endl;
             }
         }
 

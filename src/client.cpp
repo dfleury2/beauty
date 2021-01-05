@@ -119,7 +119,7 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
     try {
         _url = beauty::url(url);
 
-        if (beauty::application::Instance().is_ssl_activated()) {
+        if (_url.is_https()) {
             if (!_session_https) {
                 // Create the session on first call...
                 _session_https = std::make_shared<session_client_https>(_sync_ioc,
@@ -139,7 +139,7 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
         _sync_ioc.restart();
         _sync_ioc.run();
 
-        response = std::move(beauty::application::Instance().is_ssl_activated() ?
+        response = std::move(_url.is_https() ?
                 _session_https->response():
                 _session_http->response());
     }
@@ -172,7 +172,7 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
 
         _url = beauty::url(url);
 
-        if (beauty::application::Instance().is_ssl_activated()) {
+        if (_url.is_https()) {
             if (!_session_https) {
                 // Create the session on first call...
                 _session_https = std::make_shared<session_client_https>(

@@ -1,8 +1,5 @@
 #pragma once
 
-#include <beauty/request.hpp>
-#include <beauty/response.hpp>
-
 #include <boost/system/system_error.hpp>
 #include <boost/beast/core/string.hpp>
 
@@ -11,6 +8,9 @@
 #include <string_view>
 
 namespace beauty {
+class request;
+class response;
+
 //---------------------------------------------------------------------------
 // Returns a bad request response
 //---------------------------------------------------------------------------

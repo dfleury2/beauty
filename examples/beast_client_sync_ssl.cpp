@@ -13,8 +13,6 @@
 //
 //------------------------------------------------------------------------------
 
-#include "root_certificates.hpp"
-
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>

@@ -2,6 +2,10 @@
 
 #include <beauty/header.hpp>
 #include <beauty/version.hpp>
+#include <beauty/request.hpp>
+#include <beauty/response.hpp>
+
+#include <boost/beast/http.hpp>
 
 #include <iostream>
 #include <regex>

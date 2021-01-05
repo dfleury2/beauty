@@ -17,14 +17,16 @@ namespace beauty {
 // --------------------------------------------------------------------------
 application::application() :
     _work(asio::make_work_guard(_ioc)),
-    _ssl_context(asio::ssl::context::sslv23),
+    _ssl_context(asio::ssl::context::tlsv12),
     _state(State::waiting)
-{}
+{
+    _ssl_context.set_verify_mode(asio::ssl::verify_none);
+}
 
 // --------------------------------------------------------------------------
 application::application(certificates&& c) :
     _work(asio::make_work_guard(_ioc)),
-    _ssl_context(asio::ssl::context::sslv23),
+    _ssl_context(asio::ssl::context::tlsv12),
     _certificates(std::move(c)),
     _state(State::waiting)
 {
@@ -139,29 +141,35 @@ application::load_server_certificates()
             });
     }
 
-    auto options = asio::ssl::context::default_workarounds |
-            asio::ssl::context::no_sslv2;
+    auto options = asio::ssl::context::default_workarounds | asio::ssl::context::no_sslv2;
     if (_certificates->temporary_dh.size()) {
         options |= asio::ssl::context::single_dh_use;
     }
 
     _ssl_context.set_options(options);
 
-    _ssl_context.use_certificate_chain(
-            asio::buffer(
-                    _certificates->certificat_chain.data(),
-                    _certificates->certificat_chain.size()));
+    if (_certificates->certificat_chain.size()) {
+        _ssl_context.use_certificate_chain(
+                asio::buffer(
+                        _certificates->certificat_chain.data(),
+                        _certificates->certificat_chain.size()));
+    }
 
-    _ssl_context.use_private_key(
-        asio::buffer(_certificates->private_key.data(), _certificates->private_key.size()),
-        asio::ssl::context::file_format::pem);
+    if (_certificates->private_key.size()) {
+        _ssl_context.use_private_key(
+                asio::buffer(_certificates->private_key.data(), _certificates->private_key.size()),
+                asio::ssl::context::file_format::pem);
+    }
 
     if (_certificates->temporary_dh.size()) {
         _ssl_context.use_tmp_dh(
                 asio::buffer(_certificates->temporary_dh.data(), _certificates->temporary_dh.size()));
     }
-}
 
+    if (_certificates->certificat_chain.empty() || _certificates->private_key.empty()) {
+        _ssl_context.set_verify_mode(asio::ssl::verify_none);
+    }
+}
 
 // --------------------------------------------------------------------------
 application&
