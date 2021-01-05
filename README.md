@@ -36,7 +36,7 @@ int main()
 
     // Add a '/person/:id' route
     server.get("/person/:id", [](const auto& req, auto& res) {
-        auto& id = req.a("id");
+        auto id = req.a("id");
         res.body() = "You asked for the person id: " + id;
     });
 
