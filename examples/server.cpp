@@ -12,7 +12,7 @@ int main()
 
     // Add a '/person/:id' route
     server.get("/person/:id", [](const auto& req, auto& res) {
-        auto id = req.a("id");
+        auto id = req.a("id").as_string();
         res.body() = "You asked for the person id: " + id;
     });
 
@@ -20,5 +20,5 @@ int main()
     server.listen(8085);
 
     // Run the event loop - Warning, add a new thread (to be updated may be)
-    server.run();
+    server.run();  // or server.wait(); for no supplementary thread
 }

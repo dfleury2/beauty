@@ -9,7 +9,7 @@ attributes::attributes(const std::string& str, char sep)
     for(auto&& a : split(str, sep)) {
         auto kv = split(a, '=');
         if (kv.size() == 2) {
-            _attributes.emplace(std::string(kv[0]), std::string(kv[1]));
+            insert(std::string(kv[0]), std::string(kv[1]));
         }
     }
 }
@@ -18,11 +18,11 @@ attributes::attributes(const std::string& str, char sep)
 void
 attributes::insert(std::string key, std::string value)
 {
-    _attributes.emplace(std::move(key), std::move(value));
+    _attributes.emplace(std::move(key), beauty::unescape(value));
 }
 
 // --------------------------------------------------------------------------
-const std::string&
+const attribute&
 attributes::operator[](const std::string& key) const
 {
     auto found_key = _attributes.find(key);

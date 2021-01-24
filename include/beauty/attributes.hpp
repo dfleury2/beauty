@@ -1,5 +1,7 @@
 #pragma once
 
+#include <beauty/attribute.hpp>
+
 #include <string>
 #include <unordered_map>
 
@@ -14,12 +16,12 @@ public:
 
     void insert(std::string key, std::string value);
 
-    const std::string& operator[](const std::string& key) const;
+    const attribute& operator[](const std::string& key) const;
 
 private:
-    std::unordered_map<std::string, std::string> _attributes;
+    std::unordered_map<std::string, attribute> _attributes;
 
-    inline static const std::string EMPTY;
+    inline static const attribute EMPTY;
 };
 
 }

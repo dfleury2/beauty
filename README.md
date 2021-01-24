@@ -16,6 +16,7 @@ Beauty is a layer above <a href="https://github.com/boostorg/beast">Boost.Beast<
 - Timers and signals support included
 - Startable and stoppable application event loop
 - Customizable thread pool size
+- Work-in-progress: Swagger description API
 
 ## Examples
 
@@ -36,7 +37,7 @@ int main()
 
     // Add a '/person/:id' route
     server.get("/person/:id", [](const auto& req, auto& res) {
-        auto id = req.a("id");
+        auto id = req.a("id").as_string();
         res.body() = "You asked for the person id: " + id;
     });
 

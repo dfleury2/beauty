@@ -41,14 +41,14 @@ int main(int argc, char* argv[])
     beauty::server s(std::move(c));
 
     s.get("/:filename", [&doc_root](const beauty::request& req, beauty::response& res) {
-            auto filename = req.a("filename");
+            auto filename = req.a("filename").as_string();
 
             res.set(beauty::content_type::text_html);
             res.body() = read_file_content(doc_root / filename);
         })
      .get("/:dirname/:filename",[&doc_root](const beauty::request& req, beauty::response& res) {
-            auto dirname  = req.a("dirname");
-            auto filename = req.a("filename");
+            auto dirname  = req.a("dirname").as_string();
+            auto filename = req.a("filename").as_string();
 
             res.set(beauty::content_type::image_x_icon);
             res.body() = read_file_content(doc_root / dirname / filename);
