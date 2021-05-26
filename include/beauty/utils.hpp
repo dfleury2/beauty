@@ -11,6 +11,7 @@ namespace beauty {
 class request;
 class response;
 
+namespace helper {
 //---------------------------------------------------------------------------
 // Returns a bad request response
 //---------------------------------------------------------------------------
@@ -28,6 +29,7 @@ not_found(const beauty::request& req);
 //---------------------------------------------------------------------------
 std::shared_ptr<response>
 server_error(const beauty::request& req, const char* what);
+}
 
 //---------------------------------------------------------------------------
 // Report a failure

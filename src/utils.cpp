@@ -44,10 +44,10 @@ hexdigit_to_num(unsigned char c)
 
 namespace beauty {
 
+namespace helper {
 //---------------------------------------------------------------------------
 std::shared_ptr<response>
-bad_request(const request& req, const char* message)
-{
+bad_request(const request& req, const char* message) {
     auto res = std::make_shared<response>(http::status::bad_request, req.version());
     res->set(http::field::server, BEAUTY_PROJECT_VERSION);
     res->set(content_type::text_plain);
@@ -58,27 +58,26 @@ bad_request(const request& req, const char* message)
 
 //---------------------------------------------------------------------------
 std::shared_ptr<response>
-not_found(const request& req)
-{
+not_found(const request& req) {
     auto res = std::make_shared<response>(http::status::not_found, req.version());
     res->set(http::field::server, BEAUTY_PROJECT_VERSION);
     res->set(content_type::text_plain);
     res->keep_alive(req.keep_alive());
     res->body() = "The resource [" + std::string(req.method_string())
-            + "] '" + req.target().to_string() + "' was not found.";
+                  + "] '" + req.target().to_string() + "' was not found.";
     return res;
 }
 
 //---------------------------------------------------------------------------
 std::shared_ptr<response>
-server_error(const request& req, const char* message)
-{
+server_error(const request& req, const char* message) {
     auto res = std::make_shared<response>(http::status::internal_server_error, req.version());
     res->set(http::field::server, BEAUTY_PROJECT_VERSION);
     res->set(content_type::text_plain);
     res->keep_alive(req.keep_alive());
     res->body() = std::string("An error occurred: '") + message + "'";
     return res;
+}
 }
 
 //---------------------------------------------------------------------------
