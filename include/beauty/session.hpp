@@ -222,7 +222,7 @@ private:
 
         auto found_method = _router.find(_request.method());
         if (found_method == _router.end()) {
-            return bad_request(_request, "Not supported HTTP-method");
+            return helper::bad_request(_request, "Not supported HTTP-method");
         }
 
         // Try to match a route for this request target
@@ -242,12 +242,12 @@ private:
                     return ex.create_response(_request);
                 }
                 catch(const std::exception& ex) {
-                    return server_error(_request, ex.what());
+                    return helper::server_error(_request, ex.what());
                 }
             }
         }
 
-        return not_found(_request);
+        return helper::not_found(_request);
     }
 };
 

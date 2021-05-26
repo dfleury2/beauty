@@ -43,6 +43,9 @@ url::url(std::string u) : _url(std::move(u))
 
     // <scheme>:
     _scheme = url_split[0];
+    if (!_scheme.empty() && *_scheme.rbegin() == ':') {
+        _scheme.remove_suffix(1);
+    }
 
     // [[login][:password]@]<host>[:port]
     auto [user_info, host] = split_pair(url_split[2], '@', false);
@@ -74,6 +77,14 @@ url::url(std::string u) : _url(std::move(u))
             _path = std::string_view(&_url[pos]);
         }
     }
+}
+
+// --------------------------------------------------------------------------
+std::string
+url::strip_login_password() const {
+    return scheme() + "://" + host()
+           + (port() ? ":" + std::to_string(port()) : "")
+           + path();
 }
 
 }

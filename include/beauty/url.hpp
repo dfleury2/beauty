@@ -22,8 +22,10 @@ public:
     url() = default;
     explicit url(std::string u);
 
-    bool is_http() const { return _scheme == "http:"; }
-    bool is_https() const { return _scheme == "https:"; }
+    std::string_view scheme_view() const { return _scheme; }
+    std::string scheme() const { return std::string(_scheme); }
+    bool is_http() const { return _scheme == "http"; }
+    bool is_https() const { return _scheme == "https"; }
 
     std::string_view login_view() const { return _login; }
     std::string login() const { return std::string(_login); }
@@ -39,6 +41,8 @@ public:
     std::string path() const { return std::string(_path.size() ? _path : "/"); }
     std::string_view query_view() const { return _query; }
     std::string query() const { return std::string(_query); }
+
+    std::string strip_login_password() const;
 
 private:
     // Full input url for the string_view
