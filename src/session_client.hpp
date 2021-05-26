@@ -136,13 +136,13 @@ public:
         std::lock_guard guard{_requests_mtx};
         bool connection_required = false;
         if constexpr(SSL) {
-            //std::cout << "session_client: Connection required ? " << _requests.empty() << " && " << !_stream.next_layer().is_open() << std::endl;
+            //std::cout << "session_client:" << __LINE__ << " : Connection required ? " << _requests.empty() << " && " << !_stream.next_layer().is_open() << std::endl;
             connection_required = (_requests.empty() && !_stream.next_layer().is_open());
         } else {
-            //std::cout << "session_client: Connection required ? " << _requests.empty() << " && " << !_socket.is_open() << std::endl;
+            //std::cout << "session_client:" << __LINE__ << " : Connection required ? " << _requests.empty() << " && " << !_socket.is_open() << std::endl;
             connection_required = (_requests.empty() && !_socket.is_open());
         }
-        //std::cout << "session_client: Start a request, with new connection: " << connection_required << std::endl;
+        //std::cout << "session_client:" << __LINE__ << " : Start a request, with new connection: " << connection_required << std::endl;
         _requests.push_back(req_ctx);
 
         if (connection_required) {
@@ -150,16 +150,16 @@ public:
         }
 
         if (_pending_request) {
-            //std::cout << "session_client: There is a waiting connection or read ack, nothing to do to rearm" << std::endl;
+            //std::cout << "session_client:" << __LINE__ << " : There is a waiting connection or read ack, nothing to do to rearm" << std::endl;
         } else {
-            //std::cout << "session_client: No waiting connection ack or read ack, we must rearm" << std::endl;
+            //std::cout << "session_client:" << __LINE__ << " : No waiting connection ack or read ack, we must rearm" << std::endl;
             do_write();
         }
     }
 
     void do_resolve()
     {
-        //std::cout << "session_client: Try to resolve the host" << std::endl;
+        //std::cout << "session_client:" << __LINE__ << " : Try to resolve the host" << std::endl;
 
         // Set SNI Hostname (many hosts need this to handshake successfully)
         if constexpr(SSL) {
@@ -198,7 +198,7 @@ public:
     void on_resolve(const boost::system::error_code& ec,
             const asio::ip::tcp::resolver::results_type& results)
     {
-        //std::cout << "session_client:on resolve" << std::endl;
+        //std::cout << "session_client:" << __LINE__ << " : on_resolve" << std::endl;
         if (ec) {
             std::lock_guard guard{_requests_mtx};
             return fail(**_requests.begin(), ec, "resolve");
@@ -206,7 +206,7 @@ public:
 
         // Make the connection on the IP address we get from a lookup
         if constexpr(SSL) {
-            //std::cout << "session_client: Try a ssl connection" << std::endl;
+            //std::cout << "session_client:" << __LINE__ << " : Try a ssl connection" << std::endl;
             asio::async_connect(
                 _stream.next_layer(),
                 results.begin(),
@@ -218,7 +218,7 @@ public:
             );
         }
         else {
-            //std::cout << "session_client: Try a connection" << std::endl;
+            //std::cout << "session_client:" << __LINE__ << " : Try a connection" << std::endl;
             asio::async_connect(
                 _socket,
                 results.begin(),
@@ -234,9 +234,13 @@ public:
     void
     on_connect(const boost::system::error_code& ec)
     {
-        //std::cout << "session_client:on connect" << std::endl;
-        if(ec) {
+        //std::cout << "session_client:" << __LINE__ << " : on_connect" << std::endl;
+        if (ec) {
             std::lock_guard guard{_requests_mtx};
+
+            auto req_ctx = *_requests.begin();
+            req_ctx->timer.cancel(); // will call on_timer with operator_cancelled
+
             return fail(**_requests.begin(), ec, "connect");
         }
 
@@ -267,16 +271,16 @@ public:
 
     void
     do_write() {
-        //std::cout << "session_client:do write" << std::endl;
+        //std::cout << "session_client:" << __LINE__ << " :do write" << std::endl;
 
         // No lock here, done before the call of do_write
         if (_requests.empty()) {
-            //std::cout << "session_client: ... nothing to do" << std::endl;
+            //std::cout << "session_client:" << __LINE__ << " : ... nothing to do" << std::endl;
             _pending_request = false;
             return;
         }
 
-       //std::cout << "session_client:start a write" << std::endl;
+       //std::cout << "session_client:" << __LINE__ << " :start a write" << std::endl;
        _pending_request = true;
 
        // Send the HTTP request to the remote host
@@ -303,7 +307,7 @@ public:
     void
     on_write(boost::system::error_code ec, std::size_t)
     {
-        //std::cout << "session_client:on write" << std::endl;
+        //std::cout << "session_client:" << __LINE__ << " : on_write" << std::endl;
         std::lock_guard guard{_requests_mtx};
 
         if (ec) {
@@ -334,7 +338,7 @@ public:
     void
     on_read(boost::system::error_code ec)
     {
-        //std::cout << "session_client:on read" << std::endl;
+        //std::cout << "session_client:" << __LINE__ << " : on_read" << std::endl;
 
         std::lock_guard guard{_requests_mtx};
         auto req_ctx = *_requests.begin();
@@ -343,7 +347,7 @@ public:
             if (ec == beauty::http::error::end_of_stream) {
                 // This is the only way to get an error on connection close from server
                 // Like a keep alive which was closed
-                //std::cout << "session_client:on read - end of stream detected, trying to reconnect" << std::endl;
+                //std::cout << "session_client:" << __LINE__ << " : on_read - end of stream detected, trying to reconnect" << std::endl;
 
                 // Try to reconnect
                 do_resolve();
@@ -364,6 +368,7 @@ public:
             if (!req_ctx->too_late) {
                 _response = req_ctx->response.release();
                 req_ctx->cb(ec, std::move(_response));
+                req_ctx->cb = nullptr;
             }
         }
         else {
@@ -376,7 +381,7 @@ public:
     void
     on_timer(boost::system::error_code ec, std::shared_ptr<request_context> req_ctx)
     {
-        //std::cout << "session_client:on timer" << std::endl;
+        //std::cout << "session_client:" << __LINE__ << " : on_timer" << std::endl;
         if (!ec && !req_ctx->too_late) {
             fail(*req_ctx, boost::system::error_code(boost::system::errc::timed_out,
                     boost::system::system_category()),
@@ -406,11 +411,12 @@ private:
     std::atomic_bool        _pending_request{false};
 
 private:
-    void fail(const request_context& req_ctx, boost::system::error_code ec, const char* msg /* not used */) {
+    void fail(request_context& req_ctx, boost::system::error_code ec, const char* msg /* not used */) {
         if (req_ctx.cb) {
-            //std::cout << "session_client: !!! FAILED !!! " << ec << " with " << msg << std::endl;
+            //std::cout << "session_client:" << __LINE__ << " : !!! FAILED !!! " << ec << " with " << msg << std::endl;
             if (!req_ctx.too_late) {
                 req_ctx.cb(ec, {});
+                req_ctx.cb = nullptr;
             }
         } else {
             throw boost::system::system_error(ec);
