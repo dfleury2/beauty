@@ -28,9 +28,9 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
     auto address        = argv[1];
-    auto port           = std::atoi(argv[2]);
+    auto port           = std::stoi(argv[2]);
     fs::path doc_root   = argv[3];
-    auto threads        = std::max<int>(1, std::atoi(argv[4]));
+    auto threads        = std::max<int>(1, std::stoi(argv[4]));
 
     // Http Server
     beauty::server s;
@@ -41,14 +41,41 @@ int main(int argc, char* argv[])
             res.set(beauty::content_type::text_html);
             res.body() = read_file_content(doc_root / filename);
         })
-     .get("/:dirname/:filename",[&doc_root](const beauty::request& req, beauty::response& res) {
-            auto dirname  = req.a("dirname").as_string();
-            auto filename = req.a("filename").as_string();
+//     .get("/:dirname/:filename",[&doc_root](const beauty::request& req, beauty::response& res) {
+//            auto dirname  = req.a("dirname").as_string();
+//            auto filename = req.a("filename").as_string();
+//
+//            res.set(beauty::content_type::image_png);
+//            // or
+//            // res.set_header(beast::http::field::content_type, beauty::content_type::image_x_icon.value);
+//            res.body() = read_file_content(doc_root / dirname / filename, true);
+//        })
+     .get("/exception/:type", [](const beauty::request& req, beauty::response& res) {
+            auto type = req.a("type").as_string("bad_request");
 
-            res.set(beauty::content_type::image_png);
-            // or
-            // res.set_header(beast::http::field::content_type, beauty::content_type::image_x_icon.value);
-            res.body() = read_file_content(doc_root / dirname / filename, true);
+            if (type == "bad_request") {
+                throw beauty::http_error::client::bad_request("This is a bad request");
+            }
+            else if (type == "unauthorized") {
+                throw beauty::http_error::client::unauthorized("This is an unauthorized request");
+            }
+            else if (type == "forbidden") {
+                throw beauty::http_error::client::forbidden("This is a forbidden request");
+            }
+            else if (type == "internal_server_error") {
+                throw beauty::http_error::server::internal_server_error("This is an internal_server_error request");
+            }
+            else if (type == "not_implemented") {
+                throw beauty::http_error::server::not_implemented("This is an not_implemented request");
+            }
+            else if (type == "bad_gateway") {
+                throw beauty::http_error::server::bad_gateway("This is an bad_gateway request");
+            }
+            else if (type == "service_unavailable") {
+                throw beauty::http_error::server::service_unavailable("This is an service_unavailable request");
+            }
+
+            throw beauty::http_error::client::bad_request("type [" + type + "] is not supported");
         })
      .concurrency(threads)
      .listen(port, address);
