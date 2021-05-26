@@ -117,42 +117,35 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
     beauty::response response;
 
     try {
+        std::shared_ptr<session_client_http> session_http;
+        std::shared_ptr<session_client_https> session_https;
+
         _url = beauty::url(url);
 
         if (_url.is_https()) {
-            if (!_session_https) {
-                // Create the session on first call...
-                _session_https = std::make_shared<session_client_https>(_sync_ioc,
-                        beauty::application::Instance().ssl_context());
-            }
+            session_https = std::make_shared<session_client_https>(_sync_ioc,
+                    beauty::application::Instance().ssl_context());
 
-            _session_https->run(std::move(req), _url, d);
+            session_https->run(std::move(req), _url, d);
         }
         else {
-            if (!_session_http) {
-                _session_http = std::make_shared<session_client_http>(_sync_ioc);
-            }
-
-            _session_http->run(std::move(req), _url, d);
+            session_http = std::make_shared<session_client_http>(_sync_ioc);
+            session_http->run(std::move(req), _url, d);
         }
 
         _sync_ioc.restart();
         _sync_ioc.run();
 
         response = std::move(_url.is_https() ?
-                _session_https->response():
-                _session_http->response());
+                session_https->response():
+                session_http->response());
     }
     catch(const boost::system::system_error& ex) {
         ec = ex.code();
-        _session_https.reset();
-        _session_http.reset();
     }
     catch(const std::exception&) {
         ec = boost::system::error_code(boost::system::errc::bad_address,
                 boost::system::system_category());
-        _session_https.reset();
-        _session_http.reset();
     }
 
     return std::make_pair(ec, response);
