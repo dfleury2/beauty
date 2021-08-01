@@ -18,6 +18,7 @@
 #include <iostream>
 #include <array>
 #include <cstdint>
+#include <sstream>
 
 namespace beauty {
 
