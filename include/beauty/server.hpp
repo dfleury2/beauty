@@ -16,6 +16,7 @@ class server
 {
 public:
     server();
+    explicit server(beauty::application& app);
     explicit server(certificates&& c);
     ~server();
 

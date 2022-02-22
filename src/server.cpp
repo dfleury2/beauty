@@ -10,6 +10,11 @@ server::server() :
 {}
 
 // --------------------------------------------------------------------------
+server::server(beauty::application& app) :
+        _app(app)
+{}
+
+// --------------------------------------------------------------------------
 server::server(certificates&& c) :
         _app(beauty::application::Instance(std::move(c)))
 {}
