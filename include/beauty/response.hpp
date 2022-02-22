@@ -29,7 +29,7 @@ public:
     bool is_postponed() const { return _is_postponed; }
     void postpone() { _is_postponed = true; }
 
-    void done() { _cb(); }
+    void done() { _cb(); _cb = []{}; }
 
     void on_done(std::function<void()>&& cb) {
         _cb = std::move(cb);
