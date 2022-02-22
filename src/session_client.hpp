@@ -99,9 +99,11 @@ public:
         boost::system::error_code ec;
         if constexpr(SSL) {
             _stream.shutdown(ec);
+            _stream.lowest_layer().close();
         }
         else {
             _socket.shutdown(asio::ip::tcp::socket::shutdown_both, ec);
+            _socket.close();
         }
     }
 

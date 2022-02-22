@@ -193,6 +193,7 @@ public:
             // Send a TCP shutdown
             boost::system::error_code ec;
             _socket.shutdown(asio::ip::tcp::socket::shutdown_send, ec);
+            _socket.close();
         }
     }
 
@@ -200,6 +201,8 @@ public:
     {
         if(ec)
             return fail(ec, "shutdown");
+
+        _stream.lowest_layer().close();
     }
 
 private:
