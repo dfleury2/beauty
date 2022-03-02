@@ -175,7 +175,7 @@ int main()
 }
 ```
 
-- Websocker server
+- Websocket server
 
 Here an example of a simple chat server using websocket, use `ws://127.0.0.1:8085/chat/MyRoom` to connect the room named MyRoom.
 
