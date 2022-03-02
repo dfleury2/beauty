@@ -27,6 +27,14 @@ route::route(const std::string& path, const beauty::route_info& route_info, rout
 }
 
 // --------------------------------------------------------------------------
+route::route(const std::string& path, ws_handler&& handler) :
+        route(path)
+{
+    _is_websocket = true;
+    _ws_handler = std::move(handler);
+}
+
+// --------------------------------------------------------------------------
 // Try to extract a maximum of information from the route path
 // --------------------------------------------------------------------------
 void
@@ -76,9 +84,13 @@ route::update_route_info(const beauty::route_info& route_info)
 
 // --------------------------------------------------------------------------
 bool
-route::match(beauty::request& req) const noexcept
+route::match(beauty::request& req, bool is_websocket) const noexcept
 {
-    // Removes attributes and target split
+    if (_is_websocket != is_websocket) {
+        return false;
+    }
+
+    // Remove attributes and target split
     auto target_split = split(std::string_view{req.target().data(), req.target().size()}, '?');
     auto request_paths = split(target_split[0], '/');
     std::string attrs = (target_split.size() > 1 ? std::string(target_split[1]): "");

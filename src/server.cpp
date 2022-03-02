@@ -85,6 +85,16 @@ server::get(const std::string& path, const route_info& route_info, route_cb&& cb
 
 // --------------------------------------------------------------------------
 server&
+server::ws(const std::string& path, ws_handler&& handler)
+{
+    _router.add_route(
+            beast::http::verb::get,
+            beauty::route(path, std::move(handler)));
+    return *this;
+}
+
+// --------------------------------------------------------------------------
+server&
 server::put(const std::string& path, route_cb&& cb)
 {
     return put(path, {}, std::move(cb));

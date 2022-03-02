@@ -33,17 +33,16 @@ int main(int argc, char* argv[])
     std::string debian_ico = read_file_content(doc_root + "/icons/debian-logo.png");
 
     beauty::server s;
-    s.get("/index.html", [&index_html](const beauty::request& req, beauty::response& res) {
+    s.add_route("/index.html").get([&index_html](const beauty::request& req, beauty::response& res) {
             res.set(beauty::content_type::text_html);
             res.body() = index_html;
-        })
-     .get("/icons/debian-logo.png",[&debian_ico](const beauty::request& req, beauty::response& res) {
+        });
+    s.add_route("/icons/debian-logo.png").get([&debian_ico](const beauty::request& req, beauty::response& res) {
             res.set(beauty::content_type::image_x_icon);
             res.body() = debian_ico;
-        })
-     .concurrency(threads)
-     .listen(port, address)
-    ;
+        });
+    s.concurrency(threads);
+    s.listen(port, address);
 
     std::cout << "Waiting a bit" << std::flush;
     //for(int i = 0; i < 10; ++i) {

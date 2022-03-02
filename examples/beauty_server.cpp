@@ -5,6 +5,7 @@
 #include <iterator>
 #include <string>
 #include <filesystem>
+#include <vector>
 
 namespace fs = std::filesystem;
 
@@ -33,24 +34,27 @@ int main(int argc, char* argv[])
     auto threads        = std::max<int>(1, std::stoi(argv[4]));
 
     // Http Server
-    beauty::server s;
+    beauty::server server;
 
-    s.get("/:filename", [&doc_root](const beauty::request& req, beauty::response& res) {
-            auto filename = req.a("filename").as_string();
+    server.add_route("/:filename")
+        .get([&doc_root](const beauty::request& req, beauty::response& res) {
+            auto filename = req.a("filename").as_string("index.html");
 
             res.set(beauty::content_type::text_html);
             res.body() = read_file_content(doc_root / filename);
-        })
-//     .get("/:dirname/:filename",[&doc_root](const beauty::request& req, beauty::response& res) {
-//            auto dirname  = req.a("dirname").as_string();
-//            auto filename = req.a("filename").as_string();
-//
-//            res.set(beauty::content_type::image_png);
-//            // or
-//            // res.set_header(beast::http::field::content_type, beauty::content_type::image_x_icon.value);
-//            res.body() = read_file_content(doc_root / dirname / filename, true);
-//        })
-     .get("/exception/:type", [](const beauty::request& req, beauty::response& res) {
+        });
+    server.add_route("/:dirname/:filename")
+        .get([&doc_root](const beauty::request& req, beauty::response& res) {
+            auto dirname  = req.a("dirname").as_string();
+            auto filename = req.a("filename").as_string();
+
+            res.set(beauty::content_type::image_png);
+            // or
+            // res.set_header(beast::http::field::content_type, beauty::content_type::image_x_icon.value);
+            res.body() = read_file_content(doc_root / dirname / filename, true);
+        });
+    server.add_route("/exception/:type")
+        .get([](const beauty::request& req, beauty::response& res) {
             auto type = req.a("type").as_string("bad_request");
 
             if (type == "bad_request") {
@@ -76,9 +80,10 @@ int main(int argc, char* argv[])
             }
 
             throw beauty::http_error::client::bad_request("type [" + type + "] is not supported");
-        })
-     .concurrency(threads)
-     .listen(port, address);
+        });
+
+    server.concurrency(threads);
+    server.listen(port, address);
 
     beauty::wait();
 

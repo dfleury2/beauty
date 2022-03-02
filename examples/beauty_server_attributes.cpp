@@ -33,21 +33,23 @@ int main(int argc, char* argv[])
     auto threads        = std::max<int>(1, std::atoi(argv[4]));
 
     beauty::server s;
-    s.get("/:filename", [&doc_root](const beauty::request& req, beauty::response& res) {
-            auto filename = req.a("filename").as_string();
+    s.add_route("/:filename")
+        .get([&doc_root](const beauty::request& req, beauty::response& res) {
+            auto filename = req.a("filename").as_string("index.html");
 
             res.set(beauty::content_type::text_html);
             res.body() = read_file_content(doc_root / filename);
-        })
-     .get("/:dirname/:filename",[&doc_root](const beauty::request& req, beauty::response& res) {
+        });
+    s.add_route("/:dirname/:filename")
+        .get([&doc_root](const beauty::request& req, beauty::response& res) {
             auto dirname = req.a("dirname").as_string();
-            auto filename = req.a("filename").as_string();
+            auto filename = req.a("filename").as_string("index.html");
 
             res.set(beauty::content_type::image_x_icon);
             res.body() = read_file_content(doc_root / dirname / filename);
-        })
-     .concurrency(threads)
-     .listen(port, address);
+        });
+    s.concurrency(threads);
+    s.listen(port, address);
 
     beauty::wait();
 }

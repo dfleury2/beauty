@@ -18,6 +18,7 @@ public:
     using beast::http::request<beast::http::string_body>::operator=;
 
     attributes& get_attributes() { return _attributes; }
+    const attributes& get_attributes() const { return _attributes; }
     const attribute& a(const std::string& key) const { return _attributes[key]; }
 
     const beauty::endpoint& remote() const { return _remote_ep; }

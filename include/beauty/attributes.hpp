@@ -11,15 +11,24 @@ namespace beauty
 class attributes
 {
 public:
+    using attribute_storage = std::unordered_map<std::string, attribute>;
+
     attributes() = default;
     explicit attributes(const std::string& str, char sep = '&');
 
     void insert(std::string key, std::string value);
 
+    attribute_storage::const_iterator find(const std::string& key) const {
+        return _attributes.find(key);
+    }
+
+    attribute_storage::const_iterator begin() const { return _attributes.begin(); }
+    attribute_storage::const_iterator end() const { return _attributes.end(); }
+
     const attribute& operator[](const std::string& key) const;
 
 private:
-    std::unordered_map<std::string, attribute> _attributes;
+    attribute_storage _attributes;
 
     inline static const attribute EMPTY;
 };

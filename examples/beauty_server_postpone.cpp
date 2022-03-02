@@ -28,8 +28,8 @@ int main(int argc, char* argv[])
     beauty::server server;
 
     // Register a GET handler
-    server.get("/index.html",
-        [&](const beauty::request& req, beauty::response& res) {
+    server.add_route("/index.html")
+        .get([&](const beauty::request& req, beauty::response& res) {
             res.postpone();
 
             beauty::after(5.0, [&]() {

@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <regex>
+#include <random>
 
 namespace http = boost::beast::http;
 
@@ -169,6 +170,22 @@ unescape(const std::string& s)
     unescaped.append(vbegin, t.cend());
 
     return unescaped;
+}
+
+// --------------------------------------------------------------------------
+std::string
+make_uuid()
+{
+    static std::random_device              rd;
+    static std::mt19937                    gen(rd());
+    static std::uniform_int_distribution<> dis(0, 15);
+    static const char* digit = "0123456789ABCDEF";
+
+    std::string uuid(32, ' ');
+    for (auto& c : uuid) {
+        c = digit[dis(gen)];
+    }
+    return uuid;
 }
 
 }

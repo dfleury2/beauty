@@ -4,6 +4,7 @@
 #include <beauty/version.hpp>
 #include <beauty/utils.hpp>
 #include <beauty/exception.hpp>
+#include <beauty/websocket_session.hpp>
 
 #include <boost/beast.hpp>
 #include <boost/asio.hpp>
@@ -121,12 +122,15 @@ public:
         // Send the response
         auto response = handle_request();
 
-        if (!response->is_postponed()) {
-            do_write(response);
-        } else {
-            response->on_done([me = this->shared_from_this(), response] {
-                me->do_write(response);
-            });
+        if (response) { // Probably not a WebSocket request
+            if (!response->is_postponed()) {
+                do_write(response);
+            }
+            else {
+                response->on_done([me = this->shared_from_this(), response] {
+                    me->do_write(response);
+                });
+            }
         }
     }
 
@@ -174,7 +178,7 @@ public:
 
         // Read another request
         //std::cout << "session: Read another request" << std::endl;
-        // Allow to stay alive the session in case of postponed response
+        // Allow staying alive the session in case of postponed response
         do_read();
     }
 
@@ -212,6 +216,7 @@ private:
     beast::flat_buffer  _buffer;
     beauty::request     _request;
     std::unique_ptr<beast::http::request_parser<beast::http::string_body>> _request_parser;
+    bool _is_websocket = false;
 
     const beauty::router&   _router;
 
@@ -223,6 +228,9 @@ private:
         _request = _request_parser->release();
         _request.remote(_socket.remote_endpoint());
 
+        _is_websocket = (beast::websocket::is_upgrade(_request));
+        //std::cout << "session: handle " << (_is_websocket ? "websocket" : "request") << ", method: " << _request.method_string() << ", target: " << _request.target() << std::endl;
+
         auto found_method = _router.find(_request.method());
         if (found_method == _router.end()) {
             return helper::bad_request(_request, "Not supported HTTP-method");
@@ -230,16 +238,23 @@ private:
 
         // Try to match a route for this request target
         for(auto&& route : found_method->second) {
-            if (route.match(_request)) {
+            if (route.match(_request, _is_websocket)) {
                 // Match will update parameters request from the URL
                 try {
-                    auto res = std::make_shared<response>(beast::http::status::ok, _request.version());
-                    res->set(beast::http::field::server, BEAUTY_PROJECT_VERSION);
-                    res->keep_alive(_request.keep_alive());
+                    if (_is_websocket) {
+                        // Create a websocket session, and transferring ownership
+                        std::make_shared<websocket_session>(std::move(_socket), route)->run(_request);
+                        return nullptr;
+                     }
+                    else {
+                        auto res = std::make_shared<response>(beast::http::status::ok, _request.version());
+                        res->set(beast::http::field::server, BEAUTY_PROJECT_VERSION);
+                        res->keep_alive(_request.keep_alive());
 
-                    route.execute(_request, *res); // Call the route user handler
+                        route.execute(_request, *res); // Call the route user handler
 
-                    return res;
+                        return res;
+                    }
                 }
                 catch(const beauty::exception& ex) {
                     return ex.create_response(_request);
