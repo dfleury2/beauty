@@ -15,7 +15,7 @@ class BeautyConan(ConanFile):
     requires        = ("boost/1.77.0@",
                        "openssl/1.1.1g@")
 
-    exports_sources = "*", "!build"
+    exports_sources = "cmake", "examples*", "include*", "src*", "CMakeLists.txt", "conanfile.py"
 
     def configure_cmake(self):
         cmake = CMake(self)
