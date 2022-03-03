@@ -19,6 +19,8 @@ add_library(beauty
     ../include/beauty/timer.hpp
     ../include/beauty/url.hpp
     ../include/beauty/utils.hpp
+    ../include/beauty/websocket_context.hpp
+    ../include/beauty/websocket_session.hpp
     ./acceptor.cpp
     ./application.cpp
     ./attributes.cpp
