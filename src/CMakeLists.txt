@@ -67,6 +67,7 @@ elseif(WIN32)
             _CRT_SECURE_NO_WARNINGS
             _ITERATOR_DEBUG_LEVEL=$<IF:$<CONFIG:Debug>,2,0>
     )
+    target_compile_options(beauty PRIVATE "/bigobj")
 endif()
 
 target_include_directories(beauty
