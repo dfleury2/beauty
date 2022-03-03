@@ -23,6 +23,8 @@ Beauty is a layer above <a href="https://github.com/boostorg/beast">Boost.Beast<
 
 - a server
 
+A more complete example is available in examples/server.cpp
+
 ```cpp
 #include <beauty/beauty.hpp>
 
@@ -32,15 +34,17 @@ int main()
     beauty::server server;
 
     // Add a default '/' route
-    server.get("/", [](const auto& req, auto& res) {
-        res.body() = "It's work ;) ... it works! :)";
-    });
+    server.add_route("/")
+        .get([](const auto& req, auto& res) {
+            res.body() = "It's work ;) ... it works! :)";
+        });
 
     // Add a '/person/:id' route
-    server.get("/person/:id", [](const auto& req, auto& res) {
-        auto id = req.a("id").as_string();
-        res.body() = "You asked for the person id: " + id;
-    });
+    server.add_route("/person/:id")
+        .get([](const auto& req, auto& res) {
+            auto id = req.a("id").as_string();
+            res.body() = "You asked for the person id: " + id;
+        });
 
     // Open the listening port
     server.listen(8085);
