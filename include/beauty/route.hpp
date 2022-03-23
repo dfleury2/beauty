@@ -26,17 +26,17 @@ using ws_on_disconnect_cb = std::function<void(const ws_context& ctx)>;
 
 // --------------------------------------------------------------------------
 struct ws_handler {
-    ws_on_connect_cb on_connect;
-    ws_on_receive_cb on_receive;
-    ws_on_disconnect_cb on_disconnect;
+    ws_on_connect_cb on_connect = [](const ws_context&){};
+    ws_on_receive_cb on_receive = [](const ws_context&, const char*, std::size_t, bool) {};
+    ws_on_disconnect_cb on_disconnect = [](const ws_context& ctx){};
 };
 
 // --------------------------------------------------------------------------
 class route
 {
 public:
-    explicit route(const std::string& path, route_cb&& cb = {});
-    route(const std::string& path, const beauty::route_info& route_info, route_cb&& cb = {});
+    explicit route(const std::string& path, route_cb&& cb = [](const auto& req, auto& res){});
+    route(const std::string& path, const beauty::route_info& route_info, route_cb&& cb = [](const auto& req, auto& res){});
     route(const std::string& path, ws_handler&& handler);
 
     bool match(beauty::request& req, bool is_websocket = false) const noexcept;

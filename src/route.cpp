@@ -8,11 +8,11 @@ route::route(const std::string& path, route_cb&& cb) :
         _path(path),
         _cb(std::move(cb))
 {
-    if (path.empty() || path[0] !='/') {
+    if (path.empty() || path[0] != '/') {
         throw std::runtime_error("Route path [" + path + "] must begin with '/'.");
     }
 
-    for(auto&& p : split(path, '/')) {
+    for (auto&& p: split(path, '/')) {
         _segments.emplace_back(p);
     }
 
@@ -40,7 +40,7 @@ route::route(const std::string& path, ws_handler&& handler) :
 void
 route::extract_route_info()
 {
-    for (auto& segment : _segments) {
+    for (auto& segment: _segments) {
         if (segment[0] == ':') {
             _route_info.route_parameters.push_back(
                     beauty::route_parameter{
@@ -50,7 +50,7 @@ route::extract_route_info()
                             .type = "Undefined",
                             .format = "",
                             .required = true
-                        });
+                    });
         }
     }
 }
@@ -63,12 +63,12 @@ route::update_route_info(const beauty::route_info& route_info)
 {
     _route_info.description = route_info.description;
 
-    for (const auto& param : route_info.route_parameters) {
+    for (const auto& param: route_info.route_parameters) {
         if (auto found = std::find_if(begin(_route_info.route_parameters),
-                                  end(_route_info.route_parameters),
-                                  [&param](const auto& info) {
-            return (param.name == info.name);
-        }); found != end(_route_info.route_parameters)) {
+                    end(_route_info.route_parameters),
+                    [&param](const auto& info) {
+                        return (param.name == info.name);
+                    }); found != end(_route_info.route_parameters)) {
             found->description = param.description;
             found->type = param.type;
             found->format = param.format;
@@ -93,22 +93,24 @@ route::match(beauty::request& req, bool is_websocket) const noexcept
     // Remove attributes and target split
     auto target_split = split(std::string_view{req.target().data(), req.target().size()}, '?');
     auto request_paths = split(target_split[0], '/');
-    std::string attrs = (target_split.size() > 1 ? std::string(target_split[1]): "");
 
     if (_segments.size() != request_paths.size()) {
         return false;
     }
 
-    for(std::size_t i = 0; i < _segments.size(); ++i) {
+    std::string attrs = (target_split.size() > 1 ? std::string(target_split[1]) : "");
+
+    for (std::size_t i = 0; i < _segments.size(); ++i) {
         auto& segment = _segments[i];
         auto& request_segment = request_paths[i];
 
         if (segment[0] == ':') {
-            attrs += (attrs.empty() ? "":"&")
+            attrs += (attrs.empty() ? "" : "&")
                     + std::string(&segment[1], segment.size() - 1)
                     + "="
                     + std::string(request_segment);
-        } else if (segment != request_segment) {
+        }
+        else if (segment != request_segment) {
             return false;
         }
     }
@@ -116,8 +118,8 @@ route::match(beauty::request& req, bool is_websocket) const noexcept
     if (!attrs.empty()) {
         req.get_attributes() = attributes(attrs);
     }
+
     return true;
 }
-
 
 }

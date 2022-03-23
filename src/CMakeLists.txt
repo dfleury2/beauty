@@ -27,6 +27,7 @@ add_library(beauty
     ./client.cpp
     ./exception.cpp
     ./route.cpp
+    ./router.cpp
     ./server.cpp
     ./session_client.hpp
     ./signal.cpp
