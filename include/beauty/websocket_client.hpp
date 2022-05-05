@@ -187,6 +187,7 @@ private:
             _ws_handler.on_disconnect(_ws_context);
         }
 
+        _ws_context.uuid.clear();
         if (_websocket.is_open()) {
             _websocket.close(beast::websocket::close_code::normal, ec);
         }
