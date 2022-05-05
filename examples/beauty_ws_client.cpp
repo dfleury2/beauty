@@ -28,14 +28,16 @@ main(int argc, char* argv[])
 
             },
             .on_disconnect = [&client](const beauty::ws_context& ctx) {
-                std::cout << "disconnection... retrying" << std::endl;
-                beauty::after(1.0, [&client] {
-                    std::cout << "Trying connection ..." << std::endl;
-                    client.ws_connect();
-                });
+                std::cout << "--- Disconnected ---" << std::endl;
             },
             .on_error = [&client](boost::system::error_code ec, const char* what) {
-                std::cout << "error: " << ec << ", " << ec.message() << ": " << what << std::endl;
+                std::cout << "--- Error: " << ec << ", " << ec.message() << ": " << what << std::endl;
+
+                std::cout << "Retrying connection on error in 1s..." << std::endl;
+                beauty::after(1.0, [&client] {
+                    std::cout << "Trying connection..." << std::endl;
+                    client.ws_connect();
+                });
             }
         });
 
