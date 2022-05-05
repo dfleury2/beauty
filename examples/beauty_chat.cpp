@@ -31,6 +31,7 @@ main(int argc, char* argv[])
         .ws(beauty::ws_handler{
             .on_connect = [](const beauty::ws_context& ctx) {
                 std::cout << "on connect: " << ctx.uuid << std::endl;
+                std::cout << "    remote: " << ctx.remote_endpoint << std::endl;
                 std::cout << "    target: " << ctx.target << std::endl;
                 std::cout << "     route: " << ctx.route_path << std::endl;
                 for (const auto& attr : ctx.attributes) {

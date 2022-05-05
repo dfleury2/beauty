@@ -1,5 +1,6 @@
 #pragma once
 
+#include <beauty/version.hpp>
 #include <beauty/utils.hpp>
 #include <beauty/route.hpp>
 #include <beauty/websocket_context.hpp>
@@ -36,6 +37,7 @@ public:
 
     void run(const beauty::request& req)
     {
+        _ws_context.remote_endpoint = _websocket.next_layer().socket().remote_endpoint();
         _ws_context.target = std::string{req.target()};
         _ws_context.route_path = _route.path();
         _ws_context.attributes = req.get_attributes();
@@ -74,8 +76,9 @@ private:
 private:
     void on_accept(beast::error_code ec)
     {
-        if(ec)
+        if (ec) {
             return fail(ec, "accept");
+        }
 
         _ws_context.ws_session = shared_from_this();
         _ws_context.uuid = make_uuid();
@@ -103,8 +106,9 @@ private:
         if (ec == beast::websocket::error::closed)
             return;
 
-        if (ec)
-            fail(ec, "read");
+        if (ec) {
+            return fail(ec, "read");
+        }
 
         _route.receive(_ws_context, static_cast<const char*>(_buffer.cdata().data()), _buffer.size(), _websocket.got_text());
         _buffer.consume(_buffer.size());
@@ -117,8 +121,9 @@ private:
         _queue.push_back(std::move(str));
 
         // Are we already writing?
-        if(_queue.size() > 1)
+        if(_queue.size() > 1) {
             return;
+        }
 
         // We are not currently writing, so send this immediately
         _websocket.async_write(
@@ -131,8 +136,9 @@ private:
     void on_write(beast::error_code ec, std::size_t)
     {
         //std::cout << "websocket_session: " << _ws_context.uuid << " - on write" << std::endl;
-        if (ec)
+        if (ec) {
             return fail(ec, "write");
+        }
 
         _queue.pop_front();
 

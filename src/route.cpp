@@ -1,8 +1,7 @@
 #include <beauty/route.hpp>
 #include <beauty/utils.hpp>
 
-namespace beauty
-{
+namespace beauty {
 // --------------------------------------------------------------------------
 route::route(const std::string& path, route_cb&& cb) :
         _path(path),

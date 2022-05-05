@@ -13,7 +13,7 @@ class BeautyConan(ConanFile):
     generators      = "cmake_paths", "cmake"
 
     requires        = ("boost/1.77.0@",
-                       "openssl/1.1.1g@")
+                       "openssl/1.1.1l@")
 
     exports_sources = "CMakeLists.txt", "conanfile.py", "include*", "src*", "examples*", "cmake/*"
 

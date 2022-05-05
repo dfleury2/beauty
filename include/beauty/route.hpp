@@ -4,6 +4,7 @@
 #include <beauty/response.hpp>
 #include <beauty/swagger.hpp>
 #include <beauty/websocket_context.hpp>
+#include <beauty/websocket_handler.hpp>
 
 #include <vector>
 #include <string>
@@ -16,20 +17,6 @@ namespace beauty
 // Http callback
 // --------------------------------------------------------------------------
 using route_cb = std::function<void(const beauty::request& req, beauty::response& res)>;
-
-// --------------------------------------------------------------------------
-// Websocket callbacks
-// --------------------------------------------------------------------------
-using ws_on_connect_cb = std::function<void(const ws_context&)>;
-using ws_on_receive_cb = std::function<void(const ws_context&, const char*, std::size_t, bool)>;
-using ws_on_disconnect_cb = std::function<void(const ws_context& ctx)>;
-
-// --------------------------------------------------------------------------
-struct ws_handler {
-    ws_on_connect_cb on_connect = [](const ws_context&){};
-    ws_on_receive_cb on_receive = [](const ws_context&, const char*, std::size_t, bool) {};
-    ws_on_disconnect_cb on_disconnect = [](const ws_context& ctx){};
-};
 
 // --------------------------------------------------------------------------
 class route

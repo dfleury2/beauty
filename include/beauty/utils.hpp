@@ -1,7 +1,6 @@
 #pragma once
 
 #include <boost/system/system_error.hpp>
-#include <boost/beast/core/string.hpp>
 
 #include <vector>
 #include <string>

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <beauty/endpoint.hpp>
+
 #include <string>
 #include <memory>
 
@@ -8,6 +10,7 @@ class websocket_session;
 
 // --------------------------------------------------------------------------
 struct ws_context {
+    beauty::endpoint remote_endpoint;
     std::string uuid;
     std::weak_ptr<websocket_session> ws_session;
 

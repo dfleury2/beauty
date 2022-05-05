@@ -198,4 +198,52 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
     }
 }
 
+// --------------------------------------------------------------------------
+// WebSocket client management
+// --------------------------------------------------------------------------
+void
+client::ws(const std::string& url, ws_handler&& handler)
+{
+    try {
+        if (!beauty::application::Instance().is_started()) {
+            beauty::application::Instance().start();
+        }
+
+        if (!_session_http) {
+            // Create the session on first call...
+            _websocket_client = std::make_shared<websocket_client>(
+                    beauty::application::Instance().ioc(),
+                    beauty::url(url),
+                    std::move(handler));
+        }
+
+        ws_connect();
+    }
+    catch(const boost::system::system_error& ex) {
+        handler.on_error(ex.code(), ex.what());
+        _websocket_client.reset();
+    }
+    catch(const std::exception& ex) {
+        handler.on_error(boost::system::error_code(boost::system::errc::bad_address,
+                boost::system::system_category()), ex.what());
+        _websocket_client.reset();
+    }
+}
+
+// --------------------------------------------------------------------------
+void
+client::ws_connect()
+{
+    _websocket_client->run();
+}
+
+// --------------------------------------------------------------------------
+void
+client::ws_send(std::string&& data)
+{
+    if (_websocket_client) {
+        _websocket_client->send(std::move(data));
+    }
+}
+
 }

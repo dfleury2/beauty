@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
     }
 
     auto url        = argv[1];
-    int count       = std::atoi(argv[2]);
+    int count       = std::stoi(argv[2]);
     int step        = count / 10;
     if (!step) step = 1;
 

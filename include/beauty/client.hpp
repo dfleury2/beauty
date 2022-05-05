@@ -6,6 +6,8 @@
 #include <beauty/timer.hpp>
 #include <beauty/utils.hpp>
 #include <beauty/url.hpp>
+#include <beauty/websocket_handler.hpp>
+#include <beauty/websocket_client.hpp>
 
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
@@ -176,6 +178,13 @@ public:
     void
     send_request(beauty::request&& req, const beauty::duration& d, const std::string& url, client_cb&& cb);
 
+    // --------------------------------------------------------------------------
+    // WebSocket client management
+    // --------------------------------------------------------------------------
+    void ws(const std::string& url, ws_handler&& handler);
+    void ws_connect();
+    void ws_send(std::string&& data);
+
 private:
     url             _url;
 
@@ -184,6 +193,9 @@ private:
     std::shared_ptr<session_client_https> _session_https;
 
     asio::io_context                _sync_ioc;
+
+    // Websocket management
+    std::shared_ptr<websocket_client> _websocket_client;
 };
 
 }

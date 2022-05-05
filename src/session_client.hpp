@@ -74,11 +74,7 @@ public:
             _ioc(ioc),
             _resolver(_ioc),
             _socket(_ioc),
-#if   (BOOST_VERSION < 107000)
-          _strand(_socket.get_executor())
-#else
           _strand(asio::make_strand(ioc))
-#endif
     {}
 
     template<bool U = SSL, typename std::enable_if_t<U, int> = 0>
@@ -87,11 +83,7 @@ public:
             _resolver(_ioc),
             _socket(_ioc),
             _stream(ioc, ctx),
-#if   (BOOST_VERSION < 107000)
-          _strand(_socket.get_executor())
-#else
           _strand(asio::make_strand(ioc))
-#endif
     {}
 
     ~session_client() {

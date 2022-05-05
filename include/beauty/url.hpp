@@ -26,6 +26,8 @@ public:
     std::string scheme() const { return std::string(_scheme); }
     bool is_http() const { return _scheme == "http"; }
     bool is_https() const { return _scheme == "https"; }
+    bool is_ws() const { return _scheme == "ws"; }
+    bool is_wss() const { return _scheme == "wss"; }
 
     std::string_view login_view() const { return _login; }
     std::string login() const { return std::string(_login); }
