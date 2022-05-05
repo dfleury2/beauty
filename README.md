@@ -9,11 +9,11 @@ Beauty is a layer above <a href="https://github.com/boostorg/beast">Boost.Beast<
 
 ## Features
 - Http or Http/s server or client side
-- Websocket (no TLS yet) for server side only
+- Websocket (no TLS yet) for server and client (still experimental)
 - Synchronous or Asynchronous API
 - Timeout support
 - Postponed response from server support
-- Server easy routing with placeholders
+- Easy routing server with placeholders
 - Timers and signals support included
 - Startable and stoppable application event loop
 - Customizable thread pool size
@@ -181,7 +181,8 @@ int main()
 
 - Websocket server
 
-Here an example of a simple chat server using websocket, use `ws://127.0.0.1:8085/chat/MyRoom` to connect the room named MyRoom.
+Here an example of a simple chat server using websocket, use `ws://127.0.0.1:8085/chat/MyRoom` to connect
+to a room named MyRoom.
 
 ```cpp
 #include <beauty/beauty.hpp>
@@ -224,6 +225,54 @@ main(int argc, char* argv[])
 }
 
 ```
+
+
+- Websocket client
+
+Here an example of a simple client that connect to the previous chat server,
+use `ws://127.0.0.1:8085/chat/MyRoom` to connect to a room named MyRoom.
+
+```cpp
+int
+main(int argc, char* argv[])
+{
+    beauty::client client;
+
+    client.ws(argv[1], beauty::ws_handler{
+        .on_connect = [](const beauty::ws_context& ctx) {
+            std::cout << "--- Connected --- to: " << ctx.remote_endpoint << std::endl;
+        },
+        .on_receive = [](const beauty::ws_context& ctx, const char* data, std::size_t size, bool is_text) {
+            std::cout << "--- Received:\n";
+            std::cout.write(data, size);
+            std::cout << "\n---" << std::endl;
+
+        },
+        .on_disconnect = [&client](const beauty::ws_context& ctx) {
+            std::cout << "--- Disconnected ---" << std::endl;
+        },
+        .on_error = [&client](boost::system::error_code ec, const char* what) {
+            std::cout << "--- Error: " << ec << ", " << ec.message() << ": " << what << std::endl;
+
+            std::cout << "Retrying connection on error in 1s..." << std::endl;
+            beauty::after(1.0, [&client] {
+                std::cout << "Trying connection..." << std::endl;
+                client.ws_connect();
+            });
+        }
+    });
+
+    std::cout << "> ";
+    std::cout.flush();
+    for(std::string line; getline(std::cin, line);) {
+        if (line == "q") break;
+        std::cout << "> ";
+        std::cout.flush();
+        client.ws_send(std::move(line));
+    }
+}
+```
+
 
 Further examples can be found into the binaries directory at the root of the project.
 
