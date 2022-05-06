@@ -38,6 +38,7 @@ public:
     void run(const beauty::request& req)
     {
         _ws_context.remote_endpoint = _websocket.next_layer().socket().remote_endpoint();
+        _ws_context.local_endpoint = _websocket.next_layer().socket().local_endpoint();
         _ws_context.target = std::string{req.target()};
         _ws_context.route_path = _route.path();
         _ws_context.attributes = req.get_attributes();

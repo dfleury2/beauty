@@ -29,7 +29,13 @@ public:
             _ws_handler(std::move(handler))
     {}
 
-    ~websocket_client() = default;
+    ~websocket_client()
+    {
+        if (_websocket.is_open()) {
+            boost::system::error_code ec;
+            _websocket.close(beast::websocket::close_code::normal, ec);
+        }
+    }
 
     void run()
     {
@@ -76,9 +82,9 @@ private:
 
         //_ws_context.ws_session = shared_from_this();
         _ws_context.remote_endpoint = _websocket.next_layer().socket().remote_endpoint();
-        _ws_context.remote_endpoint = ep;
+        _ws_context.local_endpoint = _websocket.next_layer().socket().local_endpoint();
         _ws_context.uuid = make_uuid();
-        //_ws_context.target = std::string{req.target()};
+        _ws_context.target = _url.path();
         _ws_context.route_path = _url.path();
         //_ws_context.attributes = _url.query();
         //std::cout << "websocket_client: " << _ws_context.uuid << " - on connect" << std::endl;

@@ -11,6 +11,7 @@ class websocket_session;
 // --------------------------------------------------------------------------
 struct ws_context {
     beauty::endpoint remote_endpoint;
+    beauty::endpoint local_endpoint;
     std::string uuid;
     std::weak_ptr<websocket_session> ws_session;
 
