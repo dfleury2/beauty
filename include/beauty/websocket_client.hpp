@@ -48,9 +48,9 @@ public:
         _resolver.async_resolve(
                 _url.host(),
                 port_view,
-                beast::bind_front_handler(
-                        &websocket_client::on_resolve,
-                        shared_from_this()));
+                [me = this->shared_from_this()](auto ec, auto&& results) {
+                    me->on_resolve(ec, results);
+                });
     }
 
     void send(std::string&& msg) {

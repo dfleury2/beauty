@@ -53,7 +53,23 @@ url::url(std::string u) : _url(std::move(u))
         std::tie(_login, _password) = split_pair(user_info, ':');
     }
     if (host.size()) {
-        std::tie(_host, _port_view) = split_pair(host, ':');
+        // IPv6
+        if (host[0] == '[') {
+            auto found = host.find("]");
+            if (found == std::string::npos)
+                throw std::runtime_error("Invalid URL format for IPv6 [" + std::string(host) + "]");
+
+            _host = host.substr(1, found - 1);
+            if ((found = host.find(':', found + 1)) != std::string::npos) {
+                _port_view = host.substr(found + 1);
+                if (_port_view.empty()) {
+                    throw std::runtime_error("Invalid port for IPv6 [" + std::string(host) + "]");
+                }
+            }
+        }
+        else {
+            std::tie(_host, _port_view) = split_pair(host, ':');
+        }
     }
     if (_port_view.size()) {
         auto[p, ec] = std::from_chars(&_port_view[0],&_port_view[0] + _port_view.size(), _port);
