@@ -16,19 +16,32 @@ std::unique_ptr<beauty::application> g_application;
 namespace beauty {
 // --------------------------------------------------------------------------
 application::application() :
-    _work(asio::make_work_guard(_ioc)),
-    _ssl_context(asio::ssl::context::tlsv12),
-    _state(State::waiting)
+        _work(asio::make_work_guard(_ioc))
 {
     _ssl_context.set_verify_mode(asio::ssl::verify_none);
 }
 
 // --------------------------------------------------------------------------
 application::application(certificates&& c) :
-    _work(asio::make_work_guard(_ioc)),
-    _ssl_context(asio::ssl::context::tlsv12),
-    _certificates(std::move(c)),
-    _state(State::waiting)
+        _work(asio::make_work_guard(_ioc)),
+        _certificates(std::move(c))
+{
+    load_server_certificates();
+}
+
+// --------------------------------------------------------------------------
+application::application(asio::io_context& ioc) :
+        _ioc_external(&ioc),
+        _work(asio::make_work_guard(*_ioc_external))
+{
+    _ssl_context.set_verify_mode(asio::ssl::verify_none);
+}
+
+// --------------------------------------------------------------------------
+application::application(asio::io_context& ioc, certificates&& c) :
+        _ioc_external(&ioc),
+        _work(asio::make_work_guard(*_ioc_external)),
+        _certificates(std::move(c))
 {
     load_server_certificates();
 }
@@ -44,14 +57,14 @@ void
 application::start(int concurrency)
 {
     // Prevent to run twice
-    if (is_started()) {
+    if (is_started() || !is_ioc_owner()) {
         return;
     }
 
     if (is_stopped()) {
         // The application was started before, we need
         // to restart the ioc cleanly
-        _ioc.restart();
+        ioc().restart();
     }
     _state = State::started;
 
@@ -63,7 +76,7 @@ application::start(int concurrency)
         t = std::thread([this] {
             for(;;) {
                 try {
-                    _ioc.run();
+                    ioc().run();
                     break;
                 }
                 catch(const std::exception& ex) {
@@ -81,7 +94,7 @@ application::start(int concurrency)
 void
 application::stop(bool reset)
 {
-    if (is_stopped()) {
+    if (is_stopped() || !is_ioc_owner()) {
         return;
     }
     _state = State::stopped;
@@ -93,7 +106,7 @@ application::stop(bool reset)
         timers.clear();
     }
 
-    _ioc.stop();
+    ioc().stop();
 
     while(_active_threads != 0) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -104,19 +117,23 @@ application::stop(bool reset)
 void
 application::run()
 {
+    if (!is_ioc_owner()) return;
+
     if (is_stopped()) {
-        _ioc.restart();
+        ioc().restart();
     }
     _state = State::started;
 
     // Run
-    _ioc.run();
+    ioc().run();
 }
 
 // --------------------------------------------------------------------------
 void
-application::wait()
+application::wait() const
 {
+    if (!is_ioc_owner()) return;
+
     while(!is_stopped()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(25));
     }
@@ -126,14 +143,14 @@ application::wait()
 void
 application::post(std::function<void()> fct)
 {
-    boost::asio::post(_ioc.get_executor(), std::move(fct));
+    boost::asio::post(ioc().get_executor(), std::move(fct));
 }
 
 // --------------------------------------------------------------------------
 void
 application::load_server_certificates()
 {
-    if (_certificates->password.size()) {
+    if (!_certificates->password.empty()) {
         _ssl_context.set_password_callback(
             [pwd = _certificates->password](std::size_t, asio::ssl::context_base::password_purpose)
             {
@@ -142,26 +159,26 @@ application::load_server_certificates()
     }
 
     auto options = asio::ssl::context::default_workarounds | asio::ssl::context::no_sslv2;
-    if (_certificates->temporary_dh.size()) {
+    if (!_certificates->temporary_dh.empty()) {
         options |= asio::ssl::context::single_dh_use;
     }
 
     _ssl_context.set_options(options);
 
-    if (_certificates->certificat_chain.size()) {
+    if (!_certificates->certificat_chain.empty()) {
         _ssl_context.use_certificate_chain(
                 asio::buffer(
                         _certificates->certificat_chain.data(),
                         _certificates->certificat_chain.size()));
     }
 
-    if (_certificates->private_key.size()) {
+    if (!_certificates->private_key.empty()) {
         _ssl_context.use_private_key(
                 asio::buffer(_certificates->private_key.data(), _certificates->private_key.size()),
                 asio::ssl::context::file_format::pem);
     }
 
-    if (_certificates->temporary_dh.size()) {
+    if (!_certificates->temporary_dh.empty()) {
         _ssl_context.use_tmp_dh(
                 asio::buffer(_certificates->temporary_dh.data(), _certificates->temporary_dh.size()));
     }

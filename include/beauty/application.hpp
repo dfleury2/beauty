@@ -20,6 +20,8 @@ class application {
 public:
     application();
     explicit application(certificates&& c);
+    explicit application(asio::io_context& ioc);
+    application(asio::io_context& ioc, certificates&& c);
 
     ~application();
 
@@ -41,11 +43,13 @@ public:
     void run();
 
     // Wait for the application to be stopped, blocking
-    void wait();
+    void wait() const;
 
     void post(std::function<void()>);
 
-    asio::io_context& ioc() { return _ioc; }
+    asio::io_context& ioc() { return is_ioc_owner() ? _ioc: *_ioc_external; }
+    bool is_ioc_owner() const noexcept { return !_ioc_external; }
+
     asio::ssl::context& ssl_context() { return _ssl_context; }
     bool is_ssl_activated() const { return (bool)_certificates; }
 
@@ -57,8 +61,9 @@ public:
 
 private:
     asio::io_context            _ioc;
+    asio::io_context*           _ioc_external{nullptr};
     asio::executor_work_guard<asio::io_context::executor_type> _work;
-    asio::ssl::context          _ssl_context;
+    asio::ssl::context          _ssl_context{asio::ssl::context::tlsv12};
     std::optional<certificates> _certificates;
 
     std::vector<std::thread>    _threads;
