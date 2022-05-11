@@ -5,14 +5,14 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 class BeautyConan(ConanFile):
     name            = "beauty"
     description     = "HTTP Server above Boost.Beast"
-    version         = "0.1-rc"
+    version         = "1.0.0-rc1"
     url             = "https://github.com/dfleury2/beauty"
-    license         = "To be defined"
+    license         = "MIT"
     settings        = "os", "compiler", "build_type", "arch"
     options         = {"shared": [True, False]}
     default_options = "shared=False"
 
-    requires        = ("boost/1.77.0@",
+    requires        = ("boost/[>1.70.0]@",
                        "openssl/1.1.1l@")
 
     exports_sources = "CMakeLists.txt", "include*", "src*", "examples*", "cmake/*"
