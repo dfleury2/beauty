@@ -1,21 +1,34 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.15)
 
 project(Beauty)
 set(VERSION 0.1-rc)
 
-# Conan setup
-include(${CMAKE_SOURCE_DIR}/cmake/conan.cmake)
+if (CONAN_EXPORTED)
+else()
+    if (NOT EXISTS ${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
+        include(${PROJECT_SOURCE_DIR}/cmake/conan.cmake)
 
-conan_cmake_run(CONANFILE conanfile.py
-        PROFILE ${CONAN_PROFILE}
-        BASIC_SETUP CMAKE_TARGETS)
+        conan_cmake_autodetect(settings)
 
-include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
+        conan_cmake_install(PATH_OR_REFERENCE ${PROJECT_SOURCE_DIR}/conanfile.py
+                PROFILE ${CONAN_PROFILE}
+                PROFILE_BUILD ${CONAN_PROFILE}
+                BUILD missing
+                SETTINGS ${settings}
+                )
+    endif()
+endif()
+
+include(${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
 
 # C++
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSION OFF)
+
+# Some packages...
+find_package(Boost CONFIG REQUIRED)
+find_package(OpenSSL CONFIG REQUIRED)
 
 if(UNIX)
     set(THREADS_PREFER_PTHREAD_FLAG ON)

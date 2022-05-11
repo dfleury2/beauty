@@ -1,4 +1,5 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 
 # -----------------------------------------------------------------------------
 class BeautyConan(ConanFile):
@@ -10,26 +11,30 @@ class BeautyConan(ConanFile):
     settings        = "os", "compiler", "build_type", "arch"
     options         = {"shared": [True, False]}
     default_options = "shared=False"
-    generators      = "cmake_paths", "cmake"
 
     requires        = ("boost/1.77.0@",
                        "openssl/1.1.1l@")
 
-    exports_sources = "CMakeLists.txt", "conanfile.py", "include*", "src*", "examples*", "cmake/*"
+    exports_sources = "CMakeLists.txt", "include*", "src*", "examples*", "cmake/*"
 
-    def configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(source_folder=".")
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        cmake = self.configure_cmake()
-        cmake.build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build(target="beauty")
 
     def package(self):
-        cmake = self.configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build(target="beauty")
         cmake.install()
 
-    def package_info(self):
-        self.cpp_info.includedirs = ["include/" + self.name]
-        self.cpp_info.libs = ["beauty"]
+    def layout(self):
+        # package_info
+        self.cpp.package.includedirs = ["include"]
+        self.cpp.package.libs = ["beauty"]

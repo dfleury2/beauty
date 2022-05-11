@@ -80,8 +80,8 @@ target_include_directories(beauty
 
 target_link_libraries(beauty
     PUBLIC
-        CONAN_PKG::boost
-        CONAN_PKG::openssl
+        Boost::boost
+        openssl::openssl
         ${CMAKE_DL_LIBS}
 )
 
@@ -100,8 +100,11 @@ endif()
 
 configure_file(./version.hpp.in ./beauty/version.hpp)
 
+install(FILES "${CMAKE_BINARY_DIR}/src/beauty/version.hpp"
+        DESTINATION include/beauty
+)
 install(
-    DIRECTORY ${PROJECT_SOURCE_DIR}/include
+    DIRECTORY ${PROJECT_SOURCE_DIR}/include/
     DESTINATION include
 )
 
