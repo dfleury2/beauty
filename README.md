@@ -278,23 +278,35 @@ Further examples can be found into the binaries directory at the root of the pro
 
 ## Build
 
-Beauty depends Boost.Beast and OpenSsl. You can rely on Conan to get the package or only the FindPackage from CMake.
+Beauty depends Boost.Beast and OpenSsl. You can rely on Conan to get the package or
+only the FindPackage from CMake.
 
 ### Linux
+
+For Conan, you need to provide a profile, here, using default as profile.
 
 ```bash
 git clone https://github.com/dfleury2/beauty.git
 cd beauty
 mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-cmake --build .
+cmake .. -DCMAKE_BUILD_TYPE=Release -DCONAN_PROFILE=default
+cmake --build . -j4
 ```
 
-replace `cmake .. -DCMAKE_BUILD_TYPE=Release` by `cmake .. -DCMAKE_BUILD_TYPE=Release -DCONAN_false`
-to not use Conan. Hope your the dependencies are found on your Linux.
+If you do not want to use Conan, you can try:
 
+```bash
+git clone https://github.com/dfleury2/beauty.git
+cd beauty
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release -DCONAN=false
+cmake --build . -j4
+```
+
+Hope your the dependencies are found on your Linux.
 
 ### Windows
+
 ```bash
 git clone https://github.com/dfleury2/beauty.git
 cd beauty
