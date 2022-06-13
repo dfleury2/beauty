@@ -60,12 +60,12 @@ public:
     server(const server&) = delete;
     server& operator=(const server&) = delete;
 
-    server(server&&) = default;
-    server& operator=(server&&) = default;
+    server(server&&) = delete;
+    server& operator=(server&&) = delete;
 
     server& concurrency(int concurrency) { _concurrency = concurrency; return *this; }
 
-    server_route add_route(const std::string& path) { return server_route(*this, path); }
+    server_route add_route(const std::string& path) { return {*this, path}; }
 
     // Legacy API, should not be used anymore to avoid PATH duplication
     server& get(const std::string& path, route_cb&& cb);
