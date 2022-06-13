@@ -2,3 +2,4 @@ build*
 cmake-build-*
 .idea
 import.sh
+CMakeUserPresets.json
