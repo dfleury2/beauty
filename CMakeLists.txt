@@ -6,6 +6,8 @@ set(VERSION 1.0.0-rc2)
 # Check if conan is disabled
 if (NOT DEFINED CONAN OR CONAN)
     if (NOT DEFINED CONAN_IN_LOCAL_CACHE OR NOT CONAN_IN_LOCAL_CACHE)
+        message(STATUS "Generate conan_toolchain.cmake")
+
         include(${PROJECT_SOURCE_DIR}/cmake/conan.cmake)
 
         conan_cmake_autodetect(settings)
@@ -20,6 +22,8 @@ if (NOT DEFINED CONAN OR CONAN)
     endif()
 
     include(${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
+else()
+    message(STATUS "Conan package manager is disabled")
 endif()
 
 # C++
@@ -33,6 +37,7 @@ find_package(OpenSSL REQUIRED)
 
 # Conan declare openssl::openssl alias and Cmake create OpenSSL::SSL
 if(NOT TARGET openssl::openssl)
+    message(STATUS "openssl::openssl not defined, using OpenSSL::SSL as fallback")
     add_library(openssl::openssl ALIAS OpenSSL::SSL)
 endif()
 
