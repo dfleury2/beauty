@@ -104,7 +104,9 @@ acceptor::on_accept(boost::system::error_code ec)
     else {
         // Create the session SLL or not and run it
         if (_app.is_ssl_activated()) {
+#if BEAUTY_ENABLE_OPENSSL
             std::make_shared<session_https>(_app.ioc(), std::move(_socket), _router, _app.ssl_context())->run();
+#endif
         } else {
             std::make_shared<session_http>(_app.ioc(), std::move(_socket), _router)->run();
         }

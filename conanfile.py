@@ -28,7 +28,7 @@ class BeautyConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["CONAN_IN_LOCAL_CACHE"] = self.in_local_cache
-        tc.variables["ENABLE_OPENSSL"] = self.options.openssl
+        tc.variables["BEAUTY_ENABLE_OPENSSL"] = self.options.openssl
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

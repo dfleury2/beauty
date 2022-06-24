@@ -50,6 +50,13 @@ set_target_properties(beauty
         VERSION ${VERSION}
 )
 
+if(BEAUTY_ENABLE_OPENSSL)
+    target_compile_definitions(beauty
+        PUBLIC
+            BEAUTY_ENABLE_OPENSSL=1
+    )
+endif()
+
 if(UNIX)
     target_compile_definitions(beauty
         PRIVATE
@@ -81,9 +88,15 @@ target_include_directories(beauty
 target_link_libraries(beauty
     PUBLIC
         Boost::boost
-        openssl::openssl
-        ${CMAKE_DL_LIBS}
 )
+if (BEAUTY_ENABLE_OPENSSL)
+    target_link_libraries(beauty
+        PUBLIC
+            openssl::openssl
+            ${CMAKE_DL_LIBS}
+    )
+endif()
+
 
 if(UNIX)
     target_link_libraries(beauty

@@ -8,8 +8,11 @@
 
 #include <boost/beast.hpp>
 #include <boost/asio.hpp>
+
+#if BEAUTY_ENABLE_OPENSSL
 #include <boost/asio/ssl.hpp>
 #include <boost/asio/ssl/stream.hpp>
+#endif
 
 #include <string>
 #include <memory>
@@ -39,6 +42,7 @@ public:
           _router(router)
     {}
 
+#if BEAUTY_ENABLE_OPENSSL
     template<bool U = SSL, typename std::enable_if_t<U, int> = 0>
     session(asio::io_context& ioc, asio::ip::tcp::socket&& socket, const beauty::router& router, asio::ssl::context& ctx) :
           _socket(std::move(socket)),
@@ -46,11 +50,13 @@ public:
           _strand(asio::make_strand(ioc)),
           _router(router)
     {}
+#endif
 
     // Start the asynchronous operation
     void run()
     {
         if constexpr(SSL) {
+#if BEAUTY_ENABLE_OPENSSL
             // Perform the SSL handshake
             _stream.async_handshake(
                 asio::ssl::stream_base::server,
@@ -59,6 +65,7 @@ public:
                     [me = this->shared_from_this()](auto ec) {
                         me->on_ssl_handshake(ec);
                 }));
+#endif
         } else {
             do_read();
         }
@@ -265,6 +272,9 @@ private:
 
 // --------------------------------------------------------------------------
 using session_http = session<false>;
+
+#if BEAUTY_ENABLE_OPENSSL
 using session_https = session<true>;
+#endif
 
 }

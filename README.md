@@ -306,6 +306,11 @@ cmake --build . -j4
 
 Hope your the dependencies are found on your Linux.
 
+If you want to disable openssl:
+```shell
+conan install .. -pr default -pr:b default -o beauty:openssl=False -of . -r conancenter -b missing
+````
+
 ### Windows
 
 You must have a valid profile for VS Build. At this time conan center provide only pre-built packages

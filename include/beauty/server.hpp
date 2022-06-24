@@ -54,7 +54,11 @@ public:
 public:
     server();
     explicit server(beauty::application& app);
-    explicit server(certificates&& c);
+#if BEAUTY_ENABLE_OPENSSL
+    explicit server(certificates&& c) :
+            _app(beauty::application::Instance(std::move(c)))
+    {}
+#endif
     ~server();
 
     server(const server&) = delete;

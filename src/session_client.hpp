@@ -5,7 +5,9 @@
 
 #include <boost/version.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#if BEAUTY_ENABLE_OPENSSL
 #include <boost/asio/ssl.hpp>
+#endif
 
 #include <deque>
 #include <atomic>
@@ -18,9 +20,13 @@ template<bool SSL>
 class session_client : public std::enable_shared_from_this<session_client<SSL>>
 {
 public:
+#if BEAUTY_ENABLE_OPENSSL
     using stream_type = std::conditional_t<SSL,
             asio::ssl::stream<asio::ip::tcp::socket>,
             void*>;
+#else
+    using stream_type = void*;
+#endif
 
 private:
     // Store all information on a request
@@ -77,6 +83,7 @@ public:
           _strand(asio::make_strand(ioc))
     {}
 
+#if BEAUTY_ENABLE_OPENSSL
     template<bool U = SSL, typename std::enable_if_t<U, int> = 0>
     session_client(asio::io_context& ioc, asio::ssl::context& ctx) :
             _ioc(ioc),
@@ -85,13 +92,16 @@ public:
             _stream(ioc, ctx),
           _strand(asio::make_strand(ioc))
     {}
+#endif
 
     ~session_client() {
         // Gracefully close the socket
         boost::system::error_code ec;
         if constexpr(SSL) {
+#if BEAUTY_ENABLE_OPENSSL
             _stream.shutdown(ec);
             _stream.lowest_layer().close();
+#endif
         }
         else {
             _socket.shutdown(asio::ip::tcp::socket::shutdown_both, ec);
@@ -131,7 +141,9 @@ public:
         bool connection_required = false;
         if constexpr(SSL) {
             //std::cout << "session_client:" << __LINE__ << " : Connection required ? " << _requests.empty() << " && " << !_stream.next_layer().is_open() << std::endl;
+#if BEAUTY_ENABLE_OPENSSL
             connection_required = (_requests.empty() && !_stream.next_layer().is_open());
+#endif
         } else {
             //std::cout << "session_client:" << __LINE__ << " : Connection required ? " << _requests.empty() << " && " << !_socket.is_open() << std::endl;
             connection_required = (_requests.empty() && !_socket.is_open());
@@ -155,6 +167,7 @@ public:
     {
         //std::cout << "session_client:" << __LINE__ << " : Try to resolve the host" << std::endl;
 
+#if BEAUTY_ENABLE_OPENSSL
         // Set SNI Hostname (many hosts need this to handshake successfully)
         if constexpr(SSL) {
             std::string host{(*_requests.begin())->url.host()};
@@ -165,7 +178,7 @@ public:
                 return fail(**_requests.begin(), ec, "set_tlsext_hostname");
             }
         }
-
+#endif
         _pending_request = true;
 
         // Get port or the default one
@@ -200,6 +213,7 @@ public:
 
         // Make the connection on the IP address we get from a lookup
         if constexpr(SSL) {
+#if BEAUTY_ENABLE_OPENSSL
             //std::cout << "session_client:" << __LINE__ << " : Try a ssl connection" << std::endl;
             asio::async_connect(
                 _stream.next_layer(),
@@ -210,6 +224,7 @@ public:
                     me->on_connect(ec);
                 }
             );
+#endif
         }
         else {
             //std::cout << "session_client:" << __LINE__ << " : Try a connection" << std::endl;
@@ -239,12 +254,14 @@ public:
         }
 
         if constexpr(SSL) {
+#if BEAUTY_ENABLE_OPENSSL
             // Perform the SSL handshake
             _stream.async_handshake(
                 asio::ssl::stream_base::client,
                 [me = this->shared_from_this()](boost::system::error_code ec) {
                     me->on_handshake(ec);
                 });
+#endif
         }
         else {
             std::lock_guard guard{_requests_mtx};

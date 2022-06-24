@@ -1,5 +1,6 @@
 #pragma once
 
+#include <beauty/certificate.hpp>
 #include <beauty/request.hpp>
 #include <beauty/response.hpp>
 #include <beauty/version.hpp>
@@ -25,7 +26,9 @@ template<bool SSL>
 class session_client;
 
 using session_client_http = session_client<false>;
+#if BEAUTY_ENABLE_OPENSSL
 using session_client_https = session_client<true>;
+#endif
 
 // --------------------------------------------------------------------------
 class client
@@ -36,7 +39,9 @@ public:
 
 public:
     client() = default;
+#if BEAUTY_ENABLE_OPENSSL
     explicit client(certificates&& c);
+#endif
 
     // ---
     // GET
@@ -190,8 +195,9 @@ private:
 
     // Waiting for some improvements...no more double shared_ptr
     std::shared_ptr<session_client_http> _session_http;
+#if BEAUTY_ENABLE_OPENSSL
     std::shared_ptr<session_client_https> _session_https;
-
+#endif
     asio::io_context                _sync_ioc;
 
     // Websocket management

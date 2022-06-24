@@ -1,5 +1,7 @@
 #pragma once
 
+#if BEAUTY_ENABLE_OPENSSL
+
 #include <string>
 
 namespace beauty
@@ -15,3 +17,5 @@ struct certificates {
 };
 
 }
+
+#endif

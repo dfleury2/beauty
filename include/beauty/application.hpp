@@ -3,7 +3,10 @@
 #include <beauty/certificate.hpp>
 
 #include <boost/asio.hpp>
+
+#if BEAUTY_ENABLE_OPENSSL
 #include <boost/asio/ssl.hpp>
+#endif
 
 #include <vector>
 #include <thread>
@@ -19,9 +22,12 @@ class timer;
 class application {
 public:
     application();
-    explicit application(certificates&& c);
     explicit application(asio::io_context& ioc);
+
+#if BEAUTY_ENABLE_OPENSSL
+    explicit application(certificates&& c);
     application(asio::io_context& ioc, certificates&& c);
+#endif
 
     ~application();
 
@@ -50,11 +56,21 @@ public:
     asio::io_context& ioc() { return is_ioc_owner() ? _ioc: *_ioc_external; }
     bool is_ioc_owner() const noexcept { return !_ioc_external; }
 
+#if BEAUTY_ENABLE_OPENSSL
     asio::ssl::context& ssl_context() { return _ssl_context; }
-    bool is_ssl_activated() const { return (bool)_certificates; }
+#endif
+    bool is_ssl_activated() const {
+#if BEAUTY_ENABLE_OPENSSL
+        return (bool)_certificates;
+#else
+        return false;
+#endif
+    }
 
     static application& Instance();
+#if BEAUTY_ENABLE_OPENSSL
     static application& Instance(certificates&& c);
+#endif
 
     std::vector<std::shared_ptr<timer>> timers;
         // Need for cancellation, to be improved...
@@ -63,17 +79,17 @@ private:
     asio::io_context            _ioc;
     asio::io_context*           _ioc_external{nullptr};
     asio::executor_work_guard<asio::io_context::executor_type> _work;
+#if BEAUTY_ENABLE_OPENSSL
     asio::ssl::context          _ssl_context{asio::ssl::context::tlsv12};
+    void load_server_certificates();
     std::optional<certificates> _certificates;
+#endif
 
     std::vector<std::thread>    _threads;
 
     enum class State { waiting, started, stopped };
     std::atomic<State> _state{State::waiting}; // Three State allows a good ioc.restart
     std::atomic<int>   _active_threads{0}; // std::barrier in C++20
-
-private:
-    void load_server_certificates();
 };
 
 // --------------------------------------------------------------------------

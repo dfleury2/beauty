@@ -12,13 +12,28 @@ set(CMAKE_CXX_EXTENSION OFF)
 
 # Some packages...
 if (NOT DEFINED CONAN OR CONAN)
-	find_package(Boost CONFIG REQUIRED)
-	find_package(OpenSSL CONFIG REQUIRED)
-else()
-	find_package(Boost REQUIRED)
-	find_package(OpenSSL REQUIRED)
+    if (NOT EXISTS ${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
+        message(FATAL_ERROR "In Conan mode, you must run a 'conan install' command")
+    endif()
 
-    add_library(openssl::openssl ALIAS OpenSSL::SSL)
+    include(${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
+
+    find_package(Boost CONFIG REQUIRED)
+    if (BEAUTY_ENABLE_OPENSSL)
+        find_package(OpenSSL CONFIG REQUIRED)
+    endif()
+else()
+    find_package(Boost REQUIRED)
+
+    if (BEAUTY_ENABLE_OPENSSL)
+        find_package(OpenSSL REQUIRED)
+        add_library(openssl::openssl ALIAS OpenSSL::SSL)
+    endif()
+endif()
+
+if(UNIX)
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+    find_package(Threads REQUIRED)
 endif()
 
 # Beauty

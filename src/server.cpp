@@ -15,11 +15,6 @@ server::server(beauty::application& app) :
 {}
 
 // --------------------------------------------------------------------------
-server::server(certificates&& c) :
-        _app(beauty::application::Instance(std::move(c)))
-{}
-
-// --------------------------------------------------------------------------
 server::~server()
 {
     stop();

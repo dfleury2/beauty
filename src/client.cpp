@@ -1,18 +1,21 @@
 #include <beauty/client.hpp>
 
 #include <boost/system/error_code.hpp>
+#if BEAUTY_ENABLE_OPENSSL
 #include <boost/asio/ssl/stream.hpp>
+#endif
 
 #include "session_client.hpp"
 
 namespace beauty
 {
-
+#if BEAUTY_ENABLE_OPENSSL
 // --------------------------------------------------------------------------
 client::client(certificates&& c)
 {
     beauty::application::Instance(std::move(c));
 }
+#endif
 
 // --------------------------------------------------------------------------
 client::client_response
@@ -118,15 +121,19 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
 
     try {
         std::shared_ptr<session_client_http> session_http;
+#if BEAUTY_ENABLE_OPENSSL
         std::shared_ptr<session_client_https> session_https;
-
+#endif
         _url = beauty::url(url);
 
         if (_url.is_https()) {
+#if BEAUTY_ENABLE_OPENSSL
             session_https = std::make_shared<session_client_https>(_sync_ioc,
                     beauty::application::Instance().ssl_context());
 
             session_https->run(std::move(req), _url, d);
+#endif
+            throw std::runtime_error("OpenSSL is not activated");
         }
         else {
             session_http = std::make_shared<session_client_http>(_sync_ioc);
@@ -136,8 +143,10 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
         _sync_ioc.restart();
         _sync_ioc.run();
 
-        response = std::move(_url.is_https() ?
-                session_https->response():
+        response = std::move(
+#if BEAUTY_ENABLE_OPENSSL
+                _url.is_https() ? session_https->response():
+#endif
                 session_http->response());
     }
     catch(const boost::system::system_error& ex) {
@@ -166,6 +175,7 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
         _url = beauty::url(url);
 
         if (_url.is_https()) {
+#if BEAUTY_ENABLE_OPENSSL
             if (!_session_https) {
                 // Create the session on first call...
                 _session_https = std::make_shared<session_client_https>(
@@ -174,6 +184,9 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
             }
 
             _session_https->run(std::move(req), _url, d, std::move(cb));
+#else
+            throw std::runtime_error("OpenSSL is not activated");
+#endif
         }
         else {
             if (!_session_http) {
@@ -187,13 +200,17 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
     }
     catch(const boost::system::system_error& ex) {
         cb(ex.code(), {});
+#if BEAUTY_ENABLE_OPENSSL
         _session_https.reset();
+#endif
         _session_http.reset();
     }
     catch(const std::exception&) {
         cb(boost::system::error_code(boost::system::errc::bad_address,
                 boost::system::system_category()), {});
+#if BEAUTY_ENABLE_OPENSSL
         _session_https.reset();
+#endif
         _session_http.reset();
     }
 }

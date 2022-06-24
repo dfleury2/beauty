@@ -1,6 +1,5 @@
 #include <beauty/application.hpp>
 
-#include <beauty/certificate.hpp>
 #include <beauty/timer.hpp>
 
 #include <boost/asio.hpp>
@@ -18,15 +17,9 @@ namespace beauty {
 application::application() :
         _work(asio::make_work_guard(_ioc))
 {
+#if BEAUTY_ENABLE_OPENSSL
     _ssl_context.set_verify_mode(asio::ssl::verify_none);
-}
-
-// --------------------------------------------------------------------------
-application::application(certificates&& c) :
-        _work(asio::make_work_guard(_ioc)),
-        _certificates(std::move(c))
-{
-    load_server_certificates();
+#endif
 }
 
 // --------------------------------------------------------------------------
@@ -34,7 +27,18 @@ application::application(asio::io_context& ioc) :
         _ioc_external(&ioc),
         _work(asio::make_work_guard(*_ioc_external))
 {
+#if BEAUTY_ENABLE_OPENSSL
     _ssl_context.set_verify_mode(asio::ssl::verify_none);
+#endif
+}
+
+#if BEAUTY_ENABLE_OPENSSL
+// --------------------------------------------------------------------------
+application::application(certificates&& c) :
+        _work(asio::make_work_guard(_ioc)),
+        _certificates(std::move(c))
+{
+    load_server_certificates();
 }
 
 // --------------------------------------------------------------------------
@@ -45,6 +49,7 @@ application::application(asio::io_context& ioc, certificates&& c) :
 {
     load_server_certificates();
 }
+#endif
 
 // --------------------------------------------------------------------------
 application::~application()
@@ -147,6 +152,17 @@ application::post(std::function<void()> fct)
 }
 
 // --------------------------------------------------------------------------
+application&
+application::Instance()
+{
+    std::call_once(flag, [] {
+        g_application = std::make_unique<application>();
+    });
+    return *g_application;
+}
+
+#if BEAUTY_ENABLE_OPENSSL
+// --------------------------------------------------------------------------
 void
 application::load_server_certificates()
 {
@@ -190,16 +206,6 @@ application::load_server_certificates()
 
 // --------------------------------------------------------------------------
 application&
-application::Instance()
-{
-    std::call_once(flag, [] {
-        g_application = std::make_unique<application>();
-    });
-    return *g_application;
-}
-
-// --------------------------------------------------------------------------
-application&
 application::Instance(certificates&& c)
 {
     std::call_once(flag, [cert = std::move(c)]() mutable {
@@ -207,6 +213,7 @@ application::Instance(certificates&& c)
     });
     return *g_application;
 }
+#endif
 
 // --------------------------------------------------------------------------
 void
