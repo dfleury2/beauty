@@ -285,17 +285,18 @@ only the FindPackage from CMake.
 
 For Conan, you need to provide a profile, here, using default as profile.
 
-```bash
+```shell
 git clone https://github.com/dfleury2/beauty.git
 cd beauty
 mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release -DCONAN_PROFILE=default
+conan install .. -pr default -pr:b default -b missing -of .
+cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . -j4
 ```
 
 If you do not want to use Conan, you can try:
 
-```bash
+```shell
 git clone https://github.com/dfleury2/beauty.git
 cd beauty
 mkdir build && cd build
@@ -307,13 +308,23 @@ Hope your the dependencies are found on your Linux.
 
 ### Windows
 
-```bash
+You must have a valid profile for VS Build. At this time conan center provide only pre-built packages
+for VS2019 (compiler.version = 16) and x86_64 mode (arch=x86_64). Boost and OpenSSL can be compiled
+automatically for VS2022.
+
+```shell
 git clone https://github.com/dfleury2/beauty.git
 cd beauty
-mkdir build && cd build
-conan install ..
+mkdir build-vs2019 && cd build-vs2019
+conan install .. -pr vs2019 -pr:b vs2019 -b missing -of .
 cmake ..
 cmake --build . --config Release
 ```
+
+The binaries will be created in the `examples\Release` directory.cd ..
+
+or for Visual Studio 2022. Unfortunately at this time, I did not succeed to compile 
+openssl with compiler.version = 17...
+
 
 To be improved...
