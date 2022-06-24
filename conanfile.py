@@ -9,17 +9,26 @@ class BeautyConan(ConanFile):
     url             = "https://github.com/dfleury2/beauty"
     license         = "MIT"
     settings        = "os", "compiler", "build_type", "arch"
-    options         = {"shared": [True, False]}
-    default_options = "shared=False"
-
-    requires        = ("boost/[>1.70.0]@",
-                       "openssl/1.1.1l@")
+    options         = {
+        "shared": [True, False],
+        "openssl": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "openssl": True
+    }
 
     exports_sources = "CMakeLists.txt", "include*", "src*", "examples*", "cmake/*"
+
+    def requirements(self):
+        self.requires("boost/[>1.77.0]@")
+        if self.options.openssl:
+            self.requires("openssl/1.1.1l@")
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["CONAN_IN_LOCAL_CACHE"] = self.in_local_cache
+        tc.variables["ENABLE_OPENSSL"] = self.options.openssl
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
