@@ -11,18 +11,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSION OFF)
 
 # Some packages...
-find_package(Boost CONFIG REQUIRED)
-find_package(OpenSSL CONFIG REQUIRED)
+if (NOT DEFINED CONAN OR CONAN)
+	find_package(Boost CONFIG REQUIRED)
+	find_package(OpenSSL CONFIG REQUIRED)
+else()
+	find_package(Boost REQUIRED)
+	find_package(OpenSSL REQUIRED)
 
-# Conan declare openssl::openssl alias and Cmake create OpenSSL::SSL
-if(NOT TARGET openssl::openssl)
-    message(STATUS "openssl::openssl not defined, using OpenSSL::SSL as fallback")
     add_library(openssl::openssl ALIAS OpenSSL::SSL)
-endif()
-
-if(UNIX)
-    set(THREADS_PREFER_PTHREAD_FLAG ON)
-    find_package(Threads REQUIRED)
 endif()
 
 # Beauty
