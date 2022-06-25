@@ -1,0 +1,6 @@
+[requires]
+beauty/1.0.0-rc1@
+
+[generators]
+BazelDeps
+BazelToolchain

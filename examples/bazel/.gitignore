@@ -1,0 +1,14 @@
+bazel-*
+graph_info.json
+conanbuild*
+dependencies.bzl
+conan.lock
+conaninfo.txt
+
+# Ignore deps ...
+beauty
+boost
+bzip2
+libbacktrace
+openssl
+zlib
