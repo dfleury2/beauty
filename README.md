@@ -79,7 +79,7 @@ int main()
         } else {
             std::cout << response.status() << std::endl;
         }   
-    } else if (!ec) {
+    } else {
         // An error occurred
         std::cout << ec << ": " << ec.message() << std::endl;
     }
@@ -109,7 +109,7 @@ int main()
                        } else {
                            std::cout << response.status() << std::endl;
                        }
-                   } else if (!ec) {
+                   } else {
                        // An error occurred
                        std::cout << ec << ": " << ec.message() << std::endl;
                    }
