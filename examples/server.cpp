@@ -20,8 +20,21 @@ int main()
     server.add_route("/person")
         // Get the list of available ids
         .get([](const auto& req, auto& res) {
-            for (const auto& [id, _] : storage) {
-                res.body() += id + "\n";
+
+            auto id = req.a("id").as_string();
+            if (id.empty()) {
+                for (const auto& [id, _] : storage) {
+                    res.body() += id + "\n";
+                }
+            }
+            else {
+                std::string response = "Id: " + id + " not found";
+                if (auto found = storage.find(id); found != end(storage)) {
+                    res.body() = "id: " + id + ", name: " + found->second + "\n";
+                }
+                else {
+                    res.body() = "Id: " + id + " NOT FOUND";
+                }
             }
         })
         // Add a id/name
