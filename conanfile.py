@@ -21,9 +21,9 @@ class BeautyConan(ConanFile):
     exports_sources = "CMakeLists.txt", "include*", "src*", "examples*", "cmake/*"
 
     def requirements(self):
-        self.requires("boost/[>1.77.0]@")
+        self.requires("boost/1.78.0@")
         if self.options.openssl:
-            self.requires("openssl/1.1.1l@")
+            self.requires("openssl/1.1.1o@")
 
     def generate(self):
         tc = CMakeToolchain(self)
