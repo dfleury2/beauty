@@ -1,6 +1,7 @@
 #include <beauty/server.hpp>
 
-#include "nlohmann/json.hpp"
+#include <boost/json.hpp>
+#include <boost/json/src.hpp>
 
 namespace beauty
 {
@@ -162,7 +163,7 @@ server::enable_swagger(const char* swagger_entrypoint)
 {
     get(swagger_entrypoint, { .description = "Swagger API description entrypoint" },
         [this](const beauty::request& req, beauty::response& response) {
-        nlohmann::ordered_json json_swagger = {
+        boost::json::object json_swagger = {
             {"openapi", "3.0.1"},
             {"info", {
                     {"title",       _server_info.title},
@@ -174,18 +175,17 @@ server::enable_swagger(const char* swagger_entrypoint)
 
         auto to_lower = [](std::string s) { for(auto& c : s) c = std::tolower(c); return s; };
 
-        nlohmann::ordered_json paths;
+        boost::json::object paths;
         for (const auto&[verb, routes] : _router) {
             for (auto&& route : routes) {
-                nlohmann::ordered_json description = {
+                boost::json::object description = {
                         {"description", route.route_info().description}
                 };
 
                 if (!route.route_info().route_parameters.empty()) {
-                    description["parameters"] = nlohmann::json::array();
+                    description["parameters"] = boost::json::array();
                     for (const auto& param : route.route_info().route_parameters) {
-                        description["parameters"].emplace_back(
-                                nlohmann::ordered_json{
+                        description["parameters"] = {
                                         {"name",        param.name},
                                         {"in",          param.in},
                                         {"description", param.description},
@@ -195,17 +195,17 @@ server::enable_swagger(const char* swagger_entrypoint)
                                                 {"format", param.format}
                                             }
                                         }
-                                });
+                                };
                     }
                 }
 
-                paths[swagger_path(route)][to_lower(to_string(verb).to_string())] = std::move(description);
+                paths[swagger_path(route)].emplace_object()[to_lower(to_string(verb).to_string())] = std::move(description);
             }
         }
 
         json_swagger["paths"] = std::move(paths);
 
-        std::string body = json_swagger.dump();
+        std::string body = boost::json::serialize(json_swagger);
         //std::cout << body << std::endl;
 
         response.set(beauty::http::field::access_control_allow_origin, "*");
@@ -213,6 +213,5 @@ server::enable_swagger(const char* swagger_entrypoint)
         response.body() = std::move(body);
     });
 }
-
 
 }
