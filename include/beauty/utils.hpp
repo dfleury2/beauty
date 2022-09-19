@@ -48,4 +48,8 @@ split(const std::string_view& str_view, char sep = '/');
 std::string escape(const std::string& s);
 std::string unescape(const std::string& s);
 std::string make_uuid();
+
+// --------------------------------------------------------------------------
+void thread_set_name(const std::string& name);
+
 }

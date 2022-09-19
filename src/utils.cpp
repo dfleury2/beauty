@@ -188,4 +188,17 @@ make_uuid()
     return uuid;
 }
 
+//---------------------------------------------------------------------------
+void
+thread_set_name(const std::string& name) {
+#ifdef LINUX
+    constexpr int TASK_COMM_LEN = 16;
+
+    char thread_name[TASK_COMM_LEN] = "";
+    strncpy(thread_name, name.c_str(), sizeof(thread_name) - 1);
+
+    pthread_setname_np(pthread_self(), thread_name);
+#endif
+}
+
 }

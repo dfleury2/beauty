@@ -1,6 +1,7 @@
 #include <beauty/application.hpp>
 
 #include <beauty/timer.hpp>
+#include <beauty/utils.hpp>
 
 #include <boost/asio.hpp>
 
@@ -77,8 +78,10 @@ application::start(int concurrency)
     _threads.resize(std::max(1, concurrency));
     _active_threads = 0;
     for(auto& t : _threads) {
-        ++_active_threads;
-        t = std::thread([this] {
+        int id = ++_active_threads;
+        t = std::thread([this, id] {
+            beauty::thread_set_name("beauty:wkr_" + std::to_string(id));
+
             for(;;) {
                 try {
                     ioc().run();
