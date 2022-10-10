@@ -177,7 +177,7 @@ public:
     }
 
     // Low level send request
-    client_response
+    static client_response
     send_request(beauty::request&& req, const beauty::duration& d, const std::string& url);
 
     void
@@ -198,7 +198,6 @@ private:
 #if BEAUTY_ENABLE_OPENSSL
     std::shared_ptr<session_client_https> _session_https;
 #endif
-    asio::io_context                _sync_ioc;
 
     // Websocket management
     std::shared_ptr<websocket_client> _websocket_client;

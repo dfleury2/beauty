@@ -116,6 +116,8 @@ client::client_response
 client::send_request(beauty::request&& req, const beauty::duration& d,
         const std::string& url)
 {
+    asio::io_context ioc;
+
     boost::system::error_code ec;
     beauty::response response;
 
@@ -124,11 +126,11 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
 #if BEAUTY_ENABLE_OPENSSL
         std::shared_ptr<session_client_https> session_https;
 #endif
-        _url = beauty::url(url);
+        auto _url = beauty::url(url);
 
         if (_url.is_https()) {
 #if BEAUTY_ENABLE_OPENSSL
-            session_https = std::make_shared<session_client_https>(_sync_ioc,
+            session_https = std::make_shared<session_client_https>(ioc,
                     beauty::application::Instance().ssl_context());
 
             session_https->run(std::move(req), _url, d);
@@ -136,12 +138,12 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
             throw std::runtime_error("OpenSSL is not activated");
         }
         else {
-            session_http = std::make_shared<session_client_http>(_sync_ioc);
+            session_http = std::make_shared<session_client_http>(ioc);
             session_http->run(std::move(req), _url, d);
         }
 
-        _sync_ioc.restart();
-        _sync_ioc.run();
+        ioc.restart();
+        ioc.run();
 
         response = std::move(
 #if BEAUTY_ENABLE_OPENSSL
