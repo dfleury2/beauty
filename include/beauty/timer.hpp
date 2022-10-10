@@ -32,8 +32,13 @@ public:
         }
     }
 
-    void run();
+    void start();
     void stop() { _timer.cancel(); }
+
+private:
+    void check_application();
+    void register_timer();
+    void rearm();
 
 private:
     beauty::application&    _app;
@@ -44,27 +49,33 @@ private:
 
 // --------------------------------------------------------------------------
 template<typename Callback>
-void after(const duration& d, Callback&& cb, bool repeat = false)
+std::shared_ptr<beauty::timer>
+after(const duration& d, Callback&& cb, bool repeat = false)
 {
-    std::make_shared<beauty::timer>(d, std::forward<Callback>(cb), repeat)->run();
+    auto timer = std::make_shared<beauty::timer>(d, std::forward<Callback>(cb), repeat);
+    timer->start();
+    return timer;
 }
 
 template<typename Callback>
-void after(double seconds, Callback&& cb, bool repeat = false)
+std::shared_ptr<beauty::timer>
+after(double seconds, Callback&& cb, bool repeat = false)
 {
-    after(std::chrono::milliseconds((int)(seconds * 1000)), std::forward<Callback>(cb), repeat);
+    return after(std::chrono::milliseconds((int)(seconds * 1000)), std::forward<Callback>(cb), repeat);
 }
 
 template<typename Callback>
-void repeat(const duration& d, Callback&& cb)
+std::shared_ptr<beauty::timer>
+repeat(const duration& d, Callback&& cb)
 {
-    after(d, std::forward<Callback>(cb), true);
+    return after(d, std::forward<Callback>(cb), true);
 }
 
 template<typename Callback>
-void repeat(double seconds, Callback&& cb)
+std::shared_ptr<beauty::timer>
+repeat(double seconds, Callback&& cb)
 {
-    after(seconds, std::forward<Callback>(cb), true);
+    return after(seconds, std::forward<Callback>(cb), true);
 }
 
 }
