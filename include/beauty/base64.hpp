@@ -2,8 +2,7 @@
 
 #include <string>
 
-namespace beauty {
-namespace base64 {
+namespace beauty::base64 {
 
 template <typename InputIt>
 std::string encode(InputIt first, InputIt last)
@@ -142,5 +141,11 @@ decode(InputIt first, InputIt last)
     return res;
 }
 
-}   // namespace base64
-}   // namespace beauty
+// --------------------------------------------------------------------------
+inline std::string
+encode(const std::string& str) { return encode(str.begin(), str.end()); }
+
+inline std::string
+decode(const std::string& str) { return decode(str.begin(), str.end()); }
+
+}   // namespace beauty::base64
