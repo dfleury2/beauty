@@ -60,3 +60,25 @@ TEST_CASE("Asynchronous post")
 
     CHECK_EQ(was_called, 1);
 }
+
+// --------------------------------------------------------------------------
+TEST_CASE("External context")
+{
+    boost::asio::io_context ioc;
+    beauty::application app(ioc);
+
+    std::thread([&ioc] { ioc.run(); }).detach();
+
+    app.start();
+
+    int was_called = 0;
+    auto f = [&was_called]() { ++was_called; };
+
+    app.post(f);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    app.stop();
+
+    CHECK_EQ(was_called, 1);
+}
