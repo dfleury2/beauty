@@ -111,7 +111,7 @@ elseif(WIN32)
     )
 endif()
 
-configure_file(./version.hpp.in ./beauty/version.hpp)
+configure_file(./version.hpp.in ${CMAKE_BINARY_DIR}/src/beauty/version.hpp)
 
 install(FILES "${CMAKE_BINARY_DIR}/src/beauty/version.hpp"
         DESTINATION include/beauty
