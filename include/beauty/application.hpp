@@ -67,6 +67,10 @@ public:
 #endif
     }
 
+    // Sets thread name prefix for threads started by start().
+    // Only has effect before start() is called.
+    void set_thread_name_prefix(const std::string& prefix) { _thread_name_prefix = prefix; }
+
     static application& Instance();
 #if BEAUTY_ENABLE_OPENSSL
     static application& Instance(certificates&& c);
@@ -90,6 +94,8 @@ private:
     enum class State { waiting, started, stopped };
     std::atomic<State> _state{State::waiting}; // Three State allows a good ioc.restart
     std::atomic<int>   _active_threads{0}; // std::barrier in C++20
+
+    std::string _thread_name_prefix = "beauty:wkr_";
 };
 
 // --------------------------------------------------------------------------

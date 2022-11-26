@@ -80,7 +80,7 @@ application::start(int concurrency)
     for(auto& t : _threads) {
         int id = ++_active_threads;
         t = std::thread([this, id] {
-            beauty::thread_set_name("beauty:wkr_" + std::to_string(id));
+            beauty::thread_set_name(_thread_name_prefix + std::to_string(id));
 
             for(;;) {
                 try {
