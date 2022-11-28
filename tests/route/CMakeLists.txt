@@ -1,0 +1,10 @@
+add_test_executable(
+    TEST_NAME
+        route
+    SOURCES
+        test_route.cpp
+    INCLUDES
+        ../include
+    LIBRARIES
+        beauty::beauty
+)

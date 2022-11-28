@@ -1,0 +1,10 @@
+add_test_executable(
+    TEST_NAME
+        exception
+    SOURCES
+        test_exception.cpp
+    INCLUDES
+        ../include
+    LIBRARIES
+        beauty::beauty
+)

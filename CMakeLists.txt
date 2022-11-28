@@ -39,3 +39,9 @@ endif()
 # Beauty
 add_subdirectory(src)
 add_subdirectory(examples)
+
+if (NOT CONAN_IN_LOCAL_CACHE)
+  include(CTest)
+  enable_testing()
+  add_subdirectory(tests)
+endif()

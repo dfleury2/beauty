@@ -1,0 +1,10 @@
+add_test_executable(
+    TEST_NAME
+        application
+    SOURCES
+        test_application.cpp
+    INCLUDES
+        ../include
+    LIBRARIES
+        beauty::beauty
+)

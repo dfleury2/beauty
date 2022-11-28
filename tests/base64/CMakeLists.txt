@@ -1,0 +1,10 @@
+add_test_executable(
+    TEST_NAME
+        base64
+    SOURCES
+        test_base64.cpp
+    INCLUDES
+        ../include
+    LIBRARIES
+        beauty::beauty
+)

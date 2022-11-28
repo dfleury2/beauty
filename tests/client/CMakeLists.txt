@@ -1,0 +1,13 @@
+add_test_executable(
+    TEST_NAME
+        client
+    SOURCES
+        test_big_request_response.cpp
+        test_client.cpp
+        test_client_disconnected.cpp
+        test_client_swagger.cpp
+    INCLUDES
+        ../include
+    LIBRARIES
+        beauty::beauty
+)
