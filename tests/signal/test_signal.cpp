@@ -6,6 +6,7 @@
 // --------------------------------------------------------------------------
 TEST_CASE("One signal")
 {
+#if LINUX
     beauty::start();
 
     bool has_been_called = false;
@@ -30,11 +31,13 @@ TEST_CASE("One signal")
     CHECK_FALSE(has_been_called);
 
     beauty::stop();
+#endif
 }
 
 // --------------------------------------------------------------------------
 TEST_CASE("Two signal on one signal set")
 {
+#if LINUX
     beauty::start();
 
     bool sigusr1_has_been_called = false;
@@ -59,11 +62,13 @@ TEST_CASE("Two signal on one signal set")
     CHECK(sigusr2_has_been_called);
 
     beauty::stop();
+#endif
 }
 
 // --------------------------------------------------------------------------
 TEST_CASE("One signal on two signal set")
 {
+#if LINUX
     beauty::start();
 
     bool sigusr1_has_been_called = false;
@@ -97,4 +102,5 @@ TEST_CASE("One signal on two signal set")
     }
 
     beauty::stop();
+#endif
 }
