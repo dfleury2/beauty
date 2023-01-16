@@ -199,7 +199,7 @@ server::enable_swagger(const char* swagger_entrypoint)
                     }
                 }
 
-                paths[swagger_path(route)].emplace_object()[to_lower(to_string(verb).to_string())] = std::move(description);
+                paths[swagger_path(route)].emplace_object()[to_lower(std::string(to_string(verb)))] = std::move(description);
             }
         }
 

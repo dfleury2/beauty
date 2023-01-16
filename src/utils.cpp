@@ -65,7 +65,7 @@ not_found(const request& req) {
     res->set(content_type::text_plain);
     res->keep_alive(req.keep_alive());
     res->body() = "The resource [" + std::string(req.method_string())
-                  + "] '" + req.target().to_string() + "' was not found.";
+                  + "] '" + std::string(req.target()) + "' was not found.";
     return res;
 }
 
