@@ -62,6 +62,5 @@ TEST_CASE("Slow and Fast queries")
     std::cout << "fast_api_response_time = " << fast_api_response_time << std::endl;
 
     CHECK(done);
-    CHECK_GT(fast_api_response_time, 95);
-    CHECK_LT(fast_api_response_time, 115);
+    CHECK_EQ(fast_api_response_time, doctest::Approx(105).epsilon(0.1)); // 10% of error
 }
