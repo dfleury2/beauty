@@ -1,7 +1,5 @@
 #include <beauty/beauty.hpp>
 
-#include <iomanip>
-
 //------------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
@@ -27,7 +25,8 @@ int main(int argc, char* argv[])
     // Create and launch a listening port
     std::make_shared<beauty::acceptor>(app, ep, router)->run();
 
-    std::cout << "Waiting a bit" << std::flush;
+    std::cout << "Waiting a bit";
+    std::cout.flush();
 
     //for(int i = 0; i < 10; ++i) {
     for(;;) {

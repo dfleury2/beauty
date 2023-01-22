@@ -1,16 +1,10 @@
 #include <beauty/beauty.hpp>
 
-#include <fstream>
-#include <iterator>
 #include <filesystem>
 
-//------------------------------------------------------------------------------
-std::string
-read_file_content(const std::filesystem::path& filename)
-{
-    std::ifstream file{filename};
-    return {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
-}
+#include "read_file_content.hpp"
+
+namespace fs = std::filesystem;
 
 //------------------------------------------------------------------------------
 int main(int argc, char* argv[])

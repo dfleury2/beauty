@@ -1,20 +1,11 @@
 #include <beauty/beauty.hpp>
 
 #include <iostream>
-#include <fstream>
-#include <iterator>
-#include <string>
 #include <filesystem>
 
-namespace fs = std::filesystem;
+#include "read_file_content.hpp"
 
-//------------------------------------------------------------------------------
-std::string
-read_file_content(const fs::path& filename)
-{
-    std::ifstream file{filename};
-    return {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
-}
+namespace fs = std::filesystem;
 
 //------------------------------------------------------------------------------
 int main(int argc, char* argv[])
@@ -50,8 +41,8 @@ int main(int argc, char* argv[])
             auto dirname  = req.a("dirname").as_string();
             auto filename = req.a("filename").as_string();
 
-            res.set(beauty::content_type::image_x_icon);
-            res.body() = read_file_content(doc_root / dirname / filename);
+            res.set(beauty::content_type::image_png);
+            res.body() = read_file_content(doc_root / dirname / filename, true);
         })
      .concurrency(threads)
      .listen(port, address);
