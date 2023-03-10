@@ -134,8 +134,9 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
                     beauty::application::Instance().ssl_context());
 
             session_https->run(std::move(req), _url, d);
-#endif
+#else
             throw std::runtime_error("OpenSSL is not activated");
+#endif
         }
         else {
             session_http = std::make_shared<session_client_http>(ioc);
