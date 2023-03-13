@@ -15,6 +15,8 @@
         -- Volker Grabsch <vog@notjusthosting.com>
 */
 
+#include <beauty/export.hpp>
+
 #include <iostream>
 #include <array>
 #include <cstdint>
@@ -24,7 +26,7 @@ namespace beauty {
 
 using digest_type = std::array<uint8_t, 20>;
 
-class SHA1
+class BEAUTY_EXPORT SHA1
 {
 public:
     SHA1();

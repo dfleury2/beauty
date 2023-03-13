@@ -1,5 +1,7 @@
 #pragma once
 
+#include <beauty/export.hpp>
+
 #include <string>
 #include <string_view>
 
@@ -16,7 +18,7 @@ namespace beauty
 //    http://login@localhost.com/path
 //    http://login:pwd@localhost.com/path
 // --------------------------------------------------------------------------
-class url
+class BEAUTY_EXPORT url
 {
 public:
     url() = default;

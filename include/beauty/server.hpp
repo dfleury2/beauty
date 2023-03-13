@@ -6,13 +6,14 @@
 #include <beauty/acceptor.hpp>
 #include <beauty/endpoint.hpp>
 #include <beauty/swagger.hpp>
+#include <beauty/export.hpp>
 
 #include <string>
 
 namespace beauty
 {
 // --------------------------------------------------------------------------
-class server
+class BEAUTY_EXPORT server
 {
 public:
     // Avoid PATH duplication when adding multiple verbs to the same route (PATH)

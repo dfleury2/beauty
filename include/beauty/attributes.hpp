@@ -1,6 +1,7 @@
 #pragma once
 
 #include <beauty/attribute.hpp>
+#include <beauty/export.hpp>
 
 #include <string>
 #include <unordered_map>
@@ -8,7 +9,7 @@
 namespace beauty
 {
 // --------------------------------------------------------------------------
-class attributes
+class BEAUTY_EXPORT attributes
 {
 public:
     using attribute_storage = std::unordered_map<std::string, attribute>;

@@ -9,6 +9,7 @@
 #include <beauty/url.hpp>
 #include <beauty/websocket_handler.hpp>
 #include <beauty/websocket_client.hpp>
+#include <beauty/export.hpp>
 
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
@@ -31,7 +32,7 @@ using session_client_https = session_client<true>;
 #endif
 
 // --------------------------------------------------------------------------
-class client
+class BEAUTY_EXPORT client
 {
 public:
     using client_cb = std::function<void(boost::system::error_code, beauty::response&&)>;

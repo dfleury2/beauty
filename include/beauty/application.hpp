@@ -1,6 +1,7 @@
 #pragma once
 
 #include <beauty/certificate.hpp>
+#include <beauty/export.hpp>
 
 #include <boost/asio.hpp>
 
@@ -19,7 +20,7 @@ namespace beauty {
 class timer;
 
 // --------------------------------------------------------------------------
-class application {
+class BEAUTY_EXPORT application {
 public:
     application();
     explicit application(asio::io_context& ioc);
@@ -101,10 +102,10 @@ private:
 // --------------------------------------------------------------------------
 // Singleton direct access
 // --------------------------------------------------------------------------
-void start(int concurrency = 1);
-bool is_started();
-void run();
-void wait();
-void stop();
-void post(std::function<void()>);
+BEAUTY_EXPORT void start(int concurrency = 1);
+BEAUTY_EXPORT bool is_started();
+BEAUTY_EXPORT void run();
+BEAUTY_EXPORT void wait();
+BEAUTY_EXPORT void stop();
+BEAUTY_EXPORT void post(std::function<void()>);
 }
