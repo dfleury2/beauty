@@ -1,6 +1,7 @@
 #pragma once
 
 #include <beauty/route.hpp>
+#include <beauty/export.hpp>
 
 #include <boost/beast.hpp>
 
@@ -9,7 +10,7 @@ namespace beast = boost::beast;
 namespace beauty
 {
 // --------------------------------------------------------------------------
-class router {
+class BEAUTY_EXPORT router {
 public:
     using routes = std::unordered_map<beast::http::verb, std::vector<route>>;
 

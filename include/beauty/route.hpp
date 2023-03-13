@@ -5,6 +5,7 @@
 #include <beauty/swagger.hpp>
 #include <beauty/websocket_context.hpp>
 #include <beauty/websocket_handler.hpp>
+#include <beauty/export.hpp>
 
 #include <vector>
 #include <string>
@@ -19,7 +20,7 @@ namespace beauty
 using route_cb = std::function<void(const beauty::request& req, beauty::response& res)>;
 
 // --------------------------------------------------------------------------
-class route
+class BEAUTY_EXPORT route
 {
 public:
     explicit route(const std::string& path, route_cb&& cb = [](const auto& req, auto& res){});
