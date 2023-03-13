@@ -133,6 +133,7 @@ install(TARGETS beauty
     EXPORT BeautyConfig
     ARCHIVE  DESTINATION lib
     LIBRARY  DESTINATION lib
+    RUNTIME  DESTINATION bin
 )
 
 install(EXPORT BeautyConfig
