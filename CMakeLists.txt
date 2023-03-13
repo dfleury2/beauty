@@ -23,7 +23,7 @@ if (NOT DEFINED CONAN OR CONAN)
         find_package(OpenSSL CONFIG REQUIRED)
     endif()
 else()
-    find_package(Boost REQUIRED)
+    find_package(Boost REQUIRED COMPONENTS json)
 
     if (BEAUTY_ENABLE_OPENSSL)
         find_package(OpenSSL REQUIRED)

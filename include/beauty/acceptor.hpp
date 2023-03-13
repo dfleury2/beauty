@@ -3,6 +3,7 @@
 #include <beauty/application.hpp>
 #include <beauty/router.hpp>
 #include <beauty/endpoint.hpp>
+#include <beauty/export.hpp>
 
 #include <boost/asio.hpp>
 
@@ -15,7 +16,7 @@ namespace beauty {
 //---------------------------------------------------------------------------
 // Accepts incoming connections and launches the sessions
 //---------------------------------------------------------------------------
-class acceptor : public std::enable_shared_from_this<acceptor>
+class BEAUTY_EXPORT acceptor : public std::enable_shared_from_this<acceptor>
 {
 public:
     acceptor(application& app,

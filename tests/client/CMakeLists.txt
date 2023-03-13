@@ -10,4 +10,5 @@ add_test_executable(
         ../include
     LIBRARIES
         beauty::beauty
+        Boost::json
 )

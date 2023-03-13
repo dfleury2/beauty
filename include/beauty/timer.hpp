@@ -1,6 +1,7 @@
 #pragma once
 
 #include <beauty/application.hpp>
+#include <beauty/export.hpp>
 
 #include <boost/asio.hpp>
 
@@ -13,7 +14,7 @@ using duration = std::chrono::steady_clock::duration;
 using timer_cb = std::function<bool()>;
 
 // --------------------------------------------------------------------------
-class timer : public std::enable_shared_from_this<timer>
+class BEAUTY_EXPORT timer : public std::enable_shared_from_this<timer>
 {
 public:
     template<typename Callback>

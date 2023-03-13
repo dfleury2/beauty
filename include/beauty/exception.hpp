@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/beast/http/status.hpp>
+#include <beauty/export.hpp>
 
 #include <stdexcept>
 #include <string>
@@ -13,7 +14,7 @@ class request;
 class response;
 
 // --------------------------------------------------------------------------
-class exception : public std::exception {
+class BEAUTY_EXPORT exception : public std::exception {
 public:
     explicit exception(std::string message = "") : _message(std::move(message)) {}
 
@@ -40,7 +41,7 @@ protected:
 namespace http_error {
 
 #define DEFINE_BEAUTY_EXCEPTION(NAME) \
-class  NAME  : public beauty::exception { \
+class BEAUTY_EXPORT NAME : public beauty::exception { \
 public: explicit NAME(std::string message = "") : exception(beast::http::status::NAME, std::move(message)) {} }
 
 // Client - 400

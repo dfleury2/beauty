@@ -1,5 +1,7 @@
 #pragma once
 
+#include <beauty/export.hpp>
+
 #include <string>
 #include <vector>
 
@@ -31,6 +33,7 @@ struct route_info {
 };
 
 // --------------------------------------------------------------------------
+BEAUTY_EXPORT
 std::string
 swagger_path(const beauty::route& route);
 

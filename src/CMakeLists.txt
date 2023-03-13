@@ -50,6 +50,14 @@ set_target_properties(beauty
         VERSION ${VERSION}
 )
 
+include(GenerateExportHeader)
+generate_export_header(beauty EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/src/beauty/export.hpp)
+
+target_compile_definitions(beauty
+	PUBLIC
+		"$<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:BEAUTY_STATIC_DEFINE>"
+)
+
 if(BEAUTY_ENABLE_OPENSSL)
     target_compile_definitions(beauty
         PUBLIC
@@ -113,7 +121,7 @@ endif()
 
 configure_file(./version.hpp.in ${CMAKE_BINARY_DIR}/src/beauty/version.hpp)
 
-install(FILES "${CMAKE_BINARY_DIR}/src/beauty/version.hpp"
+install(FILES "${CMAKE_BINARY_DIR}/src/beauty/version.hpp" "${CMAKE_BINARY_DIR}/src/beauty/export.hpp"
         DESTINATION include/beauty
 )
 install(
@@ -125,6 +133,7 @@ install(TARGETS beauty
     EXPORT BeautyConfig
     ARCHIVE  DESTINATION lib
     LIBRARY  DESTINATION lib
+    RUNTIME  DESTINATION bin
 )
 
 install(EXPORT BeautyConfig
