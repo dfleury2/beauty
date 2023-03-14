@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSION OFF)
 
 # Some packages...
-if (DEFINED CONAN)
+if (DEFINED CONAN AND CONAN)
     if (NOT EXISTS ${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
         message(FATAL_ERROR "In Conan mode, you must run a 'conan install' command")
     endif()
