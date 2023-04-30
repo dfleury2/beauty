@@ -1,4 +1,4 @@
-from conans import ConanFile
+from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 
 # -----------------------------------------------------------------------------
@@ -20,7 +20,7 @@ class BeautyConan(ConanFile):
 
     exports_sources = "CMakeLists.txt", "include*", "src*", "examples*", "cmake/*"
 
-    def requirements(self):
+    def build_requirements(self):
         self.requires("boost/1.78.0@")
         if self.options.openssl:
             self.requires("openssl/1.1.1o@")
