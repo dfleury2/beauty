@@ -17,29 +17,31 @@ main(int argc, char* argv[])
 
         beauty::client client;
 
-        client.ws(argv[1], beauty::ws_handler{
-                .on_connect = [](const beauty::ws_context& ctx) {
-                    std::cout << "--- Connected --- to: " << ctx.remote_endpoint << std::endl;
-                },
-                .on_receive = [](const beauty::ws_context& ctx, const char* data, std::size_t size, bool is_text) {
-                    std::cout << "--- Received:\n";
-                    std::cout.write(data, size);
-                    std::cout << "\n---" << std::endl;
+        beauty::ws_handler handler;
+        handler.on_connect = [](const beauty::ws_context& ctx) {
+          std::cout << "--- Connected --- to: " << ctx.remote_endpoint << std::endl;
+        };
+        handler.on_receive = [](const beauty::ws_context& ctx, const char* data, std::size_t size, bool is_text) {
+          std::cout << "--- Received:\n";
+          std::cout.write(data, size);
+          std::cout << "\n---" << std::endl;
 
-                },
-                .on_disconnect = [&client](const beauty::ws_context& ctx) {
-                    std::cout << "--- Disconnected ---" << std::endl;
-                },
-                .on_error = [&client](boost::system::error_code ec, const char* what) {
-                    std::cout << "--- Error: " << ec << ", " << ec.message() << ": " << what << std::endl;
+        };
+        handler.on_disconnect = [&client](const beauty::ws_context& ctx) {
+          std::cout << "--- Disconnected ---" << std::endl;
+        };
+        handler.on_error = [&client](boost::system::error_code ec, const char* what) {
+          std::cout << "--- Error: " << ec << ", " << ec.message() << ": "
+                    << what << std::endl;
 
-                    std::cout << "Retrying connection on error in 1s..." << std::endl;
-                    beauty::after(1.0, [&client] {
-                        std::cout << "Trying connection..." << std::endl;
-                        client.ws_connect();
-                    });
-                }
-        });
+          std::cout << "Retrying connection on error in 1s..." << std::endl;
+          beauty::after(1.0, [&client] {
+            std::cout << "Trying connection..." << std::endl;
+            client.ws_connect();
+          });
+        };
+
+        client.ws(argv[1], std::move(handler));
 
         std::cout << "> ";
         std::cout.flush();

@@ -161,7 +161,10 @@ server::del(const std::string& path, const beauty::route_info& route_info, route
 void
 server::enable_swagger(const char* swagger_entrypoint)
 {
-    get(swagger_entrypoint, { .description = "Swagger API description entrypoint" },
+    route_info ri;
+    ri.description = "Swagger API description entrypoint";
+
+    get(swagger_entrypoint, ri,
         [this](const beauty::request& req, beauty::response& response) {
         boost::json::object json_swagger = {
             {"openapi", "3.0.1"},

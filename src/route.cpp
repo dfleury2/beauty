@@ -41,15 +41,15 @@ route::extract_route_info()
 {
     for (auto& segment: _segments) {
         if (segment[0] == ':') {
-            _route_info.route_parameters.push_back(
-                    beauty::route_parameter{
-                            .name = segment.data() + 1,
-                            .in = "path",
-                            .description = "Undefined",
-                            .type = "Undefined",
-                            .format = "",
-                            .required = true
-                    });
+          beauty::route_parameter route_parameter;
+          route_parameter.name = segment.data() + 1;
+          route_parameter.in = "path";
+          route_parameter.description = "Undefined";
+          route_parameter.type = "Undefined";
+          route_parameter.format = "";
+          route_parameter.required = true;
+
+            _route_info.route_parameters.push_back(std::move(route_parameter));
         }
     }
 }

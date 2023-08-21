@@ -10,11 +10,12 @@ struct SwaggerFixture
 {
     SwaggerFixture()
     {
-        server.info(beauty::server_info{ // The type is here to guide the completion
-            .title = "SwaggerFixture",
-            .description = "SwaggerFixture description",
-            .version = "1.0"
-        });
+        beauty::server_info info;
+        info.title = "SwaggerFixture";
+        info.description = "SwaggerFixture description";
+        info.version = "1.0";
+
+        server.info(info);
 
         server.concurrency(2); // 2 threads are needed here because of synchronous get
 

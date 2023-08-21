@@ -1,12 +1,12 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.21)
 
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}")
 
 project(Beauty)
-set(VERSION 1.0.0)
+set(VERSION 1.0.1-rc)
 
 # C++
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSION OFF)
 

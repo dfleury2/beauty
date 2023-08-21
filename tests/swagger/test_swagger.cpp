@@ -20,6 +20,7 @@ TEST_CASE("Route with automatic swagger")
 // --------------------------------------------------------------------------
 TEST_CASE("Swagger route with single parameter")
 {
+#if __cplusplus >= 202002L
     beauty::route route("/topic/:name", {
         .description = "My Way",
         .route_parameters = {{.name = "name", .description = "A Name"}}
@@ -33,11 +34,13 @@ TEST_CASE("Swagger route with single parameter")
     CHECK_EQ(params[0].in,      "path");
     CHECK_EQ(params[0].description,      "A Name");
     CHECK(params[0].required);
+#endif
 }
 
 // --------------------------------------------------------------------------
 TEST_CASE("Swagger complex route")
 {
+#if __cplusplus >= 202002L
     beauty::route route("/topic/:name/chapter/:chapter_number/page/:page_number", beauty::route_info{
             .description = "Get a book to read",
             .route_parameters = {
@@ -71,6 +74,7 @@ TEST_CASE("Swagger complex route")
     CHECK_EQ(params[3].in,      "query");
     CHECK_EQ(params[3].description, "Format to output");
     CHECK_EQ(params[3].required, false);
+#endif
 }
 
 // --------------------------------------------------------------------------

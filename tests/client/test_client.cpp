@@ -170,7 +170,7 @@ TEST_CASE_FIXTURE(ClientFixture, "Get Asynchronous Timeout ")
 
         auto cb = [&called](boost::system::error_code ec, beauty::response&& response) {
             called = !called;
-            CHECK_EQ(ec, boost::system::errc::timed_out);
+            CHECK_EQ(ec.value(), boost::system::errc::timed_out);
             CHECK_EQ(response.body().size(), 0);
         };
 

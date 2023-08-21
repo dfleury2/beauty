@@ -33,12 +33,13 @@ TEST_CASE("Start and stop - multiple threads")
 // --------------------------------------------------------------------------
 TEST_CASE("Server swagger info")
 {
+    beauty::server_info info;
+    info.title = "My start and stop test server";
+    info.description = "This is a test for starting and stopping a Beauty server";
+    info.version = BEAUTY_PROJECT_VERSION;
+
     beauty::server server;
-    server.info({
-            .title = "My start and stop test server",
-            .description = "This is a test for starting and stopping a Beauty server",
-            .version = BEAUTY_PROJECT_VERSION
-    });
+    server.info(info);
 
     CHECK_EQ(server.info().title, "My start and stop test server");
 }
