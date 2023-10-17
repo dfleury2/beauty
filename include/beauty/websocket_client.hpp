@@ -53,11 +53,11 @@ public:
                 });
     }
 
-    void send(std::string&& msg) {
+    void send(std::string&& msg, bool binary_mode = false) {
         beast::net::post(
                 _websocket.get_executor(),
-                [me = this->shared_from_this(), str = std::move(msg)]() mutable {
-                    me->do_write(std::move(str));
+                [me = this->shared_from_this(), str = std::move(msg), binary_mode]() mutable {
+                    me->do_write(std::move(str), binary_mode);
                 });
     }
 
@@ -149,9 +149,12 @@ private:
         do_read();
     }
 
-    void do_write(std::string&& str)
+    void do_write(std::string&& str, bool binary_mode)
     {
-        _queue.push_back(std::move(str));
+        message msg;
+        msg.buffer = std::move(str);
+        msg.binary_mode = binary_mode;
+        _queue.push_back(std::move(msg));
 
         // Are we already writing?
         if(_queue.size() > 1) {
@@ -159,8 +162,10 @@ private:
         }
 
         // We are not currently writing, so send this immediately
+        _websocket.binary(_queue.front().binary_mode);
+
         _websocket.async_write(
-                beast::net::buffer(_queue.front()),
+                beast::net::buffer(_queue.front().buffer),
                 [me = this->shared_from_this()](auto ec, std::size_t size) {
                     me->on_write(ec, size);
                 });
@@ -176,8 +181,10 @@ private:
         _queue.pop_front();
 
         if (!_queue.empty()) {
+            _websocket.binary(_queue.front().binary_mode);
+
             _websocket.async_write(
-                    beast::net::buffer(_queue.front()),
+                    beast::net::buffer(_queue.front().buffer),
                     [me = this->shared_from_this()](auto ec, std::size_t size) {
                         me->on_write(ec, size);
                     });
@@ -206,7 +213,13 @@ private:
     url _url;
     ws_handler _ws_handler;
     ws_context _ws_context;
-    std::deque<std::string> _queue;
+
+    struct message {
+        std::string buffer;
+        bool binary_mode{false};
+    };
+
+    std::deque<message> _queue;
 };
 
 }
