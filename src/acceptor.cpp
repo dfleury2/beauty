@@ -28,9 +28,23 @@ acceptor::acceptor(
     // Allow address reuse
     _acceptor.set_option(asio::socket_base::reuse_address(true));
     if (ec) {
-        fail(ec, "set_option");
+        fail(ec, "set_option(reuse_address)");
         _app.stop();
         return;
+    }
+
+    if (endpoint.address().is_v6()) {
+        // Unconditionally set IPV6_V6ONLY socket option. This way a consistent behavior
+        // is ensured for IPv6 connections. Without setting the option it's not clear
+        // whether two separate sockets need to be opened for IPv4 and IPv6 or just
+        // a single one suffices. Unfortunately there is no way to get the default value
+        // on runtime, thus forcing the option is the only solution.
+        _acceptor.set_option(asio::ip::v6_only(true));
+        if (ec) {
+            fail(ec, "set_option(v6_only)");
+            _app.stop();
+            return;
+        }
     }
 
     // Bind to the server address
