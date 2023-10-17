@@ -5,7 +5,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 class BeautyConan(ConanFile):
     name            = "beauty"
     description     = "HTTP Server above Boost.Beast"
-    version         = "1.0.0"
+    version         = "1.0.1"
     url             = "https://github.com/dfleury2/beauty"
     license         = "MIT"
     settings        = "os", "compiler", "build_type", "arch"
