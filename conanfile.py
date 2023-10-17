@@ -1,6 +1,8 @@
 from conans import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 
+import os
+
 # -----------------------------------------------------------------------------
 class BeautyConan(ConanFile):
     name            = "beauty"
@@ -48,3 +50,22 @@ class BeautyConan(ConanFile):
         # package_info
         self.cpp.package.includedirs = ["include"]
         self.cpp.package.libs = ["beauty"]
+
+        # layout info
+        self.cpp.build.includedirs = ["src"]
+        self.cpp.build.libdirs = ["lib"]
+        self.cpp.build.libs = ["beauty"]
+
+        self.cpp.source.includedirs = ["include"]
+
+
+        # build folder detection for editable mode
+        conan_folders_build = os.getenv("CONAN_FOLDERS_BUILD", "build")
+        if "CONAN_FOLDERS_BUILD" not in os.environ:
+            build_type = str(self.settings.build_type).lower()
+            if os.path.isdir(os.path.join(self.recipe_folder, f"cmake-build-{build_type}")):
+                conan_folders_build = f"cmake-build-{build_type}"
+
+        self.folders.build = conan_folders_build
+        print(f"-- Conan folders build {self.folders.build}")
+        self.folders.generators = self.folders.build
