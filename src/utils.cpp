@@ -191,7 +191,7 @@ make_uuid()
 //---------------------------------------------------------------------------
 void
 thread_set_name(const std::string& name) {
-#ifdef LINUX
+#if LINUX && _GNU_SOURCE
     constexpr int TASK_COMM_LEN = 16;
 
     char thread_name[TASK_COMM_LEN] = "";
