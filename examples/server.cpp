@@ -2,6 +2,7 @@
 
 #include <unordered_map>
 #include <istream>
+#include <iostream>
 
 std::unordered_map<std::string /* id */, std::string /* name */> storage;
 
@@ -55,6 +56,19 @@ int main()
             if (auto found = storage.find(id); found != end(storage)) {
                 res.body() = "id: " + id + ", name: " + found->second + "\n";
             }
+        });
+
+
+    // Example for : wget 'http://localhost:8085/channel/setChannel/{"indoor":true,"outdoor":{"left":false,"right":true}}'
+    server.add_route("/channel/setChannel/:value")
+        .get([&](const auto& req, auto& res) {
+          auto channel = req.a("value").as_string();
+
+          std::cout << "value: " << channel << std::endl;
+          // Must display:
+          // value: {"indoor":true,"outdoor":{"left":false,"right":true}}
+
+          res.body() = "ok";
         });
 
     // Open the listening port
