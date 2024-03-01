@@ -289,7 +289,7 @@ For Conan, you need to provide a profile, here, using default as profile.
 git clone https://github.com/dfleury2/beauty.git
 cd beauty
 mkdir build && cd build
-conan install .. -pr default -pr:b default -b missing -of .
+conan install .. -pr default -pr:b default -b missing -of ..
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . -j4
 ```
