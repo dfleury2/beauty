@@ -46,6 +46,36 @@ public: explicit NAME(std::string message = "") : exception(beast::http::status:
 
 // Client - 400
 namespace client {
+#if BOOST_VERSION >= 108500
+DEFINE_BEAUTY_EXCEPTION(bad_request);
+DEFINE_BEAUTY_EXCEPTION(unauthorized);
+DEFINE_BEAUTY_EXCEPTION(payment_required);
+DEFINE_BEAUTY_EXCEPTION(forbidden);
+DEFINE_BEAUTY_EXCEPTION(not_found);
+DEFINE_BEAUTY_EXCEPTION(method_not_allowed);
+DEFINE_BEAUTY_EXCEPTION(not_acceptable);
+DEFINE_BEAUTY_EXCEPTION(proxy_authentication_required);
+DEFINE_BEAUTY_EXCEPTION(request_timeout);
+DEFINE_BEAUTY_EXCEPTION(conflict);
+DEFINE_BEAUTY_EXCEPTION(gone);
+DEFINE_BEAUTY_EXCEPTION(length_required);
+DEFINE_BEAUTY_EXCEPTION(precondition_failed);
+DEFINE_BEAUTY_EXCEPTION(payload_too_large);
+DEFINE_BEAUTY_EXCEPTION(uri_too_long);
+DEFINE_BEAUTY_EXCEPTION(unsupported_media_type);
+DEFINE_BEAUTY_EXCEPTION(range_not_satisfiable);
+DEFINE_BEAUTY_EXCEPTION(expectation_failed);
+DEFINE_BEAUTY_EXCEPTION(misdirected_request);
+DEFINE_BEAUTY_EXCEPTION(unprocessable_entity);
+DEFINE_BEAUTY_EXCEPTION(locked);
+DEFINE_BEAUTY_EXCEPTION(failed_dependency);
+DEFINE_BEAUTY_EXCEPTION(too_early);
+DEFINE_BEAUTY_EXCEPTION(upgrade_required);
+DEFINE_BEAUTY_EXCEPTION(precondition_required);
+DEFINE_BEAUTY_EXCEPTION(too_many_requests);
+DEFINE_BEAUTY_EXCEPTION(request_header_fields_too_large);
+DEFINE_BEAUTY_EXCEPTION(unavailable_for_legal_reasons);
+#else
 DEFINE_BEAUTY_EXCEPTION(bad_request);
 DEFINE_BEAUTY_EXCEPTION(unauthorized);
 DEFINE_BEAUTY_EXCEPTION(payment_required);
@@ -75,6 +105,7 @@ DEFINE_BEAUTY_EXCEPTION(request_header_fields_too_large);
 DEFINE_BEAUTY_EXCEPTION(connection_closed_without_response);
 DEFINE_BEAUTY_EXCEPTION(unavailable_for_legal_reasons);
 DEFINE_BEAUTY_EXCEPTION(client_closed_request);
+#endif
 }
 
 // Server - 500
@@ -90,7 +121,9 @@ DEFINE_BEAUTY_EXCEPTION(insufficient_storage);
 DEFINE_BEAUTY_EXCEPTION(loop_detected);
 DEFINE_BEAUTY_EXCEPTION(not_extended);
 DEFINE_BEAUTY_EXCEPTION(network_authentication_required);
+#if BOOST_VERSION < 10850
 DEFINE_BEAUTY_EXCEPTION(network_connect_timeout_error);
+#endif
 }
 
 #undef DEFINE_BEAUTY_EXCEPTION
