@@ -78,7 +78,7 @@ int main()
             std::cout << response.body() << std::endl;
         } else {
             std::cout << response.status() << std::endl;
-        }   
+        }
     } else {
         // An error occurred
         std::cout << ec << ": " << ec.message() << std::endl;
@@ -287,35 +287,55 @@ For Conan, you need to provide a profile, here, using default as profile.
 
 ```shell
 git clone https://github.com/dfleury2/beauty.git
-cd beauty
-mkdir build && cd build
-conan install .. -pr default -pr:b default -b missing -of ..
-cmake .. -DCMAKE_BUILD_TYPE=Release
-cmake --build . -j4
+cd beauty/
+conan install . -pr default -pr:b default -b missing -of build
+cmake -S . -B build --preset conan-release
+cmake --build build --preset conan-release
 ```
 
 If you do not want to use Conan, you can try:
 
 ```shell
 git clone https://github.com/dfleury2/beauty.git
-cd beauty
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release -DCONAN=false
-cmake --build . -j4
+cd beauty/
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
 ```
 
 Hope your the dependencies are found on your Linux.
 
 If you want to disable openssl:
 ```shell
-conan install .. -pr default -pr:b default -o beauty:openssl=False -of . -r conancenter -b missing
-````
+conan install . -o "&:openssl=False" -pr default -pr:b default -b missing -of build
+```
+
+In case you want to build and run unit tests, you can use the following command:
+
+```shell
+git clone https://github.com/dfleury2/beauty.git
+cd beauty/
+cmake -S . -B build -DBUILD_TESTING=ON
+cmake --build build
+cd build/tests/
+ctest
+```
+
+To build the examples, you can use the following command:
+
+```shell
+git clone https://github.com/dfleury2/beauty.git
+cd beauty/
+cmake -S . -B build -DBEAUTY_BUILD_EXAMPLES=ON
+cmake --build build
+cd build/examples/
+./beauty_application # or any other example
+```
 
 ### Linux Makefile
 
 For those who want just a simple Makefile without bothering with dependency management,
 in the `docs` directory, there is an example of a simple one-shot Makefile to create a
-library archive to be used in another project. This Makefile must used (and moved) at the 
+library archive to be used in another project. This Makefile must used (and moved) at the
 at the project root.
 
 ```makefile
@@ -342,7 +362,7 @@ $(LIB): version.hpp $(OBJS)
 	ar -r $@ $(OBJS)
 
 version.hpp:
-	VERSION=1.0.0-rc1 envsubst < src/version.hpp.in > ./include/beauty/version.hpp
+	VERSION=1.0.4 envsubst < src/version.hpp.in > ./include/beauty/version.hpp
 
 clean:
 	rm -f libeauty.a ./src/*.o ./include/beauty/version.hpp
@@ -357,15 +377,14 @@ automatically for VS2022.
 ```shell
 git clone https://github.com/dfleury2/beauty.git
 cd beauty
-mkdir build-vs2019 && cd build-vs2019
-conan install .. -pr vs2019 -pr:b vs2019 -b missing -of .
-cmake ..
-cmake --build . --config Release
+conan install . -o "&:openssl=False" -pr vs2019 -pr:b vs2019 -b missing -of build
+cmake -S . -B build --preset conan-release
+cmake --build build --config Release
 ```
 
-The binaries will be created in the `examples\Release` directory.cd ..
+The binaries will be created in the `build\examples\Release` directory.cd ..
 
-or for Visual Studio 2022. Unfortunately at this time, I did not succeed to compile 
+or for Visual Studio 2022. Unfortunately at this time, I did not succeed to compile
 openssl with compiler.version = 17...
 
 
