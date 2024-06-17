@@ -1,5 +1,7 @@
-from conans import ConanFile
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, rmdir
+from conan.tools.build import check_min_cppstd
 
 import os
 
@@ -11,26 +13,50 @@ class BeautyConan(ConanFile):
     url             = "https://github.com/dfleury2/beauty"
     license         = "MIT"
     settings        = "os", "compiler", "build_type", "arch"
+    package_type    = "library"
     options         = {
+        "fPIC": [True, False],
         "shared": [True, False],
         "openssl": [True, False]
     }
     default_options = {
+        "fPIC": True,
         "shared": False,
         "openssl": True
     }
+    options_description = {
+        "fPIC": "Enable Position Independent Code",
+        "shared": "Build shared library",
+        "openssl": "Enable OpenSSL support"
+    }
+    implements = ["auto_shared_fpic"]
 
-    exports_sources = "CMakeLists.txt", "include*", "src*", "examples*", "cmake/*"
+    def export_sources(self):
+        copy(self, "*.hpp", dst=os.path.join(self.export_sources_folder, "include"), src=os.path.join(self.recipe_folder, "include"))
+        copy(self, "*", dst=os.path.join(self.export_sources_folder, "src"), src=os.path.join(self.recipe_folder, "src"))
+        copy(self, "*", dst=os.path.join(self.export_sources_folder, "tests"), src=os.path.join(self.recipe_folder, "tests"))
+        copy(self, "*", dst=os.path.join(self.export_sources_folder, "examples"), src=os.path.join(self.recipe_folder, "examples"))
+        copy(self, "CMakeLists.txt", dst=self.export_sources_folder, src=self.recipe_folder)
+        copy(self, "LICENSE", dst=self.export_folder, src=self.recipe_folder)
+
+    def layout(self):
+        cmake_layout(self)
 
     def requirements(self):
-        self.requires("boost/1.85.0@")
+        self.requires("boost/1.85.0", transitive_headers=True)
         if self.options.openssl:
-            self.requires("openssl/1.1.1w@")
+            # dependency of asio in boost, exposed in boost/asio/ssl/detail/openssl_types.hpp
+            self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, "17")
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CONAN_IN_LOCAL_CACHE"] = self.in_local_cache
         tc.variables["BEAUTY_ENABLE_OPENSSL"] = self.options.openssl
+        tc.variables["BEAUTY_BUILD_EXAMPLES"] = not self.conf.get("user.beauty:skip_examples", default=True, check_type=bool)
+        tc.variables["BUILD_TESTING"] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -38,34 +64,23 @@ class BeautyConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.configure()
-        cmake.build(target="beauty")
+        cmake.build()
+        if not self.conf.get("tools.build:skip_test", default=True, check_type=bool):
+            cmake.test()
 
     def package(self):
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
-        cmake.configure()
-        cmake.build(target="beauty")
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def layout(self):
-        # package_info
-        self.cpp.package.includedirs = ["include"]
-        self.cpp.package.libs = ["beauty"]
-
-        # layout info
-        self.cpp.build.includedirs = ["src"]
-        self.cpp.build.libdirs = ["lib"]
-        self.cpp.build.libs = ["beauty"]
-
-        self.cpp.source.includedirs = ["include"]
-
-
-        # build folder detection for editable mode
-        conan_folders_build = os.getenv("CONAN_FOLDERS_BUILD", "build")
-        if "CONAN_FOLDERS_BUILD" not in os.environ:
-            build_type = str(self.settings.build_type).lower()
-            if os.path.isdir(os.path.join(self.recipe_folder, f"cmake-build-{build_type}")):
-                conan_folders_build = f"cmake-build-{build_type}"
-
-        self.folders.build = conan_folders_build
-        print(f"-- Conan folders build {self.folders.build}")
-        self.folders.generators = self.folders.build
+        self.cpp_info.libs = ["beauty"]
+        self.cpp_info.set_property("cmake_file_name", "Beauty")
+        self.cpp_info.set_property("cmake_target_name", "beauty::beauty")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["pthread"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["crypt32"]
+        if self.options.openssl:
+            self.cpp_info.defines = ["BEAUTY_ENABLE_OPENSSL"]

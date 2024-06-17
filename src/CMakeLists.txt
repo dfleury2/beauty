@@ -46,8 +46,13 @@ set_target_properties(beauty
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
         OUTPUT_NAME beauty
-        SOVERSION ${VERSION}
-        VERSION ${VERSION}
+        SOVERSION ${CMAKE_PROJECT_VERSION}
+        VERSION ${CMAKE_PROJECT_VERSION}
+)
+
+target_compile_features(beauty
+    PUBLIC
+        cxx_std_17
 )
 
 include(GenerateExportHeader)
@@ -100,18 +105,22 @@ target_link_libraries(beauty
 if (BEAUTY_ENABLE_OPENSSL)
     target_link_libraries(beauty
         PUBLIC
-            openssl::openssl
+            OpenSSL::SSL
             ${CMAKE_DL_LIBS}
     )
 endif()
-
 
 if(UNIX)
     target_link_libraries(beauty
         PUBLIC
             Threads::Threads
-            stdc++fs
     )
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        target_link_libraries(beauty
+            PUBLIC
+                stdc++fs
+        )
+    endif()
 elseif(WIN32)
     target_link_libraries(beauty
         PUBLIC
@@ -131,13 +140,13 @@ install(
 
 install(TARGETS beauty
     EXPORT BeautyConfig
-    ARCHIVE  DESTINATION lib
-    LIBRARY  DESTINATION lib
-    RUNTIME  DESTINATION bin
+    ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
 install(EXPORT BeautyConfig
     FILE BeautyConfig.cmake
     NAMESPACE beauty::
-    DESTINATION lib/cmake/beauty
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/beauty
 )
