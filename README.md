@@ -278,7 +278,7 @@ Further examples can be found into the binaries directory at the root of the pro
 
 ## Build
 
-Beauty depends Boost.Beast and OpenSsl. You can rely on Conan to get the package or
+Beauty depends Boost.Beast and OpenSsl. You can rely on Conan 2.x to get the package or
 only the FindPackage from CMake.
 
 ### Linux

@@ -5,7 +5,8 @@ from conan.tools.build import check_min_cppstd
 
 import os
 
-# -----------------------------------------------------------------------------
+required_conan_version = ">=2.0.9"
+
 class BeautyConan(ConanFile):
     name            = "beauty"
     description     = "HTTP Server above Boost.Beast"
