@@ -88,8 +88,11 @@ class BeautyConan(ConanFile):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+        copy(self, "*", dst=os.path.join(self.package_folder, "examples"),
+                src=os.path.join(self.build_folder, "examples"),
+                excludes=["*.cpp", "*.hpp", "*.pem", "*.txt", "*.cmake", "CMakeFiles", "bazel"])
+        copy(self, "*.t", dst=os.path.join(self.package_folder, "tests"), src=os.path.join(self.build_folder, "t"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        copy(self, "*", dst=os.path.join(self.package_folder, "examples"), src=os.path.join(self.build_folder, "examples"))
 
     def layout(self):
         self.cpp_info.libs = ["beauty"]
