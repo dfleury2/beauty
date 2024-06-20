@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 3.21)
 
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}")
+set(VERSION 1.0.4)
 
-project(Beauty LANGUAGES CXX VERSION 1.0.4)
+project(Beauty LANGUAGES CXX VERSION ${VERSION})
 
 option(BEAUTY_ENABLE_OPENSSL "Enable OpenSSL support" OFF)
 option(BEAUTY_BUILD_EXAMPLES "Build examples" ON)
+option(BUILD_TESTING "Build tests" ON)
 
 find_package(Boost CONFIG REQUIRED)
 if (BEAUTY_ENABLE_OPENSSL)

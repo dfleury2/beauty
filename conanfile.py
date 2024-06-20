@@ -5,7 +5,7 @@ from conan.tools.build import check_min_cppstd
 
 import os
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=1.53.0"
 
 class BeautyConan(ConanFile):
     name            = "beauty"
@@ -30,7 +30,22 @@ class BeautyConan(ConanFile):
         "shared": "Build shared library",
         "openssl": "Enable OpenSSL support"
     }
-    implements = ["auto_shared_fpic"]
+
+    @property
+    def _build_tests(self):
+        return not self.conf.get("tools.build:skip_test", default=False, check_type=bool)
+
+    @property
+    def _build_examples(self):
+        return not self.conf.get("user.beauty:skip_examples", default=False, check_type=bool)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
     def export_sources(self):
         copy(self, "*.hpp", dst=os.path.join(self.export_sources_folder, "include"), src=os.path.join(self.recipe_folder, "include"))
@@ -41,7 +56,7 @@ class BeautyConan(ConanFile):
         copy(self, "LICENSE", dst=self.export_folder, src=self.recipe_folder)
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("boost/1.85.0", transitive_headers=True)
@@ -56,8 +71,8 @@ class BeautyConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BEAUTY_ENABLE_OPENSSL"] = self.options.openssl
-        tc.variables["BEAUTY_BUILD_EXAMPLES"] = not self.conf.get("user.beauty:skip_examples", default=True, check_type=bool)
-        tc.variables["BUILD_TESTING"] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
+        tc.variables["BEAUTY_BUILD_EXAMPLES"] = self._build_examples
+        tc.variables["BUILD_TESTING"] = self._build_tests
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -66,7 +81,7 @@ class BeautyConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-        if not self.conf.get("tools.build:skip_test", default=True, check_type=bool):
+        if self._build_tests:
             cmake.test()
 
     def package(self):
@@ -74,6 +89,7 @@ class BeautyConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        copy(self, "*", dst=os.path.join(self.package_folder, "examples"), src=os.path.join(self.build_folder, "examples"))
 
     def layout(self):
         self.cpp_info.libs = ["beauty"]
