@@ -1,0 +1,48 @@
+name: ci-linux
+
+on: [pull_request, workflow_dispatch]
+
+jobs:
+  ci-linux-gcc-13:
+    name: ci-linux-g++-13-static-release
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Cache Conan packages
+        uses: actions/cache@v4.0.2
+        env:
+          cache-name: cache-conan-packages
+        with:
+          path: ~/.conan2
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('conanfile.py') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Install Conan
+        run: python -m pip install -r .github/requirements.txt ninja
+
+      - name: Detect Conan profile
+        run: conan profile detect --force --name=gcc-13
+
+      - name: Install Conan Dependencies
+        run: |
+          conan install -r conancenter conanfile.py -of ${{ github.workspace }} -pr:b gcc-13 -pr:h gcc-13 --build=missing
+
+      - name: Build
+        run: |
+          cmake -S . -B ${{ github.workspace }}/build -G Ninja -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/build/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS:BOOL=OFF -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCONAN_IN_LOCAL_CACHE:BOOL=OFF
+          cmake --build ${{ github.workspace }}/build
+
+      - name: Test
+        working-directory: ${{ github.workspace }}/build
+        run: ctest --output-on-failure

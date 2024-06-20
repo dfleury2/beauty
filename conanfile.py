@@ -1,5 +1,6 @@
-from conans import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
+from conan.tools.scm import Version
 
 import os
 
@@ -29,7 +30,7 @@ class BeautyConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CONAN_IN_LOCAL_CACHE"] = self.in_local_cache
+        tc.variables["CONAN_IN_LOCAL_CACHE"] = self.in_local_cache if Version(conan_version) < "2" else not self.conf.get("tools.build:skip_test", default=False, check_type=bool)
         tc.variables["BEAUTY_ENABLE_OPENSSL"] = self.options.openssl
         tc.generate()
         deps = CMakeDeps(self)
