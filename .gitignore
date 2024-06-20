@@ -3,3 +3,6 @@ cmake-build-*
 .idea
 import.sh
 CMakeUserPresets.json
+venv
+graph_info.json
+conanbuildinfo.txt

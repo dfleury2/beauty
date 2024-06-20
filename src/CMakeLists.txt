@@ -46,12 +46,12 @@ set_target_properties(beauty
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
         OUTPUT_NAME beauty
-        SOVERSION ${VERSION}
-        VERSION ${VERSION}
+        SOVERSION ${CMAKE_PROJECT_VERSION}
+        VERSION ${CMAKE_PROJECT_VERSION}
 )
 
 target_compile_features(beauty
-        PUBLIC
+    PUBLIC
         cxx_std_17
 )
 
@@ -110,7 +110,6 @@ if (BEAUTY_ENABLE_OPENSSL)
     )
 endif()
 
-
 if(UNIX)
     target_link_libraries(beauty
         PUBLIC
@@ -118,7 +117,7 @@ if(UNIX)
     )
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         target_link_libraries(beauty
-                PUBLIC
+            PUBLIC
                 stdc++fs
         )
     endif()
