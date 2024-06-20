@@ -22,7 +22,6 @@ else()
 
     if (BEAUTY_ENABLE_OPENSSL)
         find_package(OpenSSL REQUIRED)
-        add_library(openssl::openssl ALIAS OpenSSL::SSL)
     endif()
 endif()
 
