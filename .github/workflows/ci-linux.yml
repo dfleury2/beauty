@@ -38,6 +38,9 @@ jobs:
         run: |
           conan install -r conancenter conanfile.py -of ${{ github.workspace }} -pr:b gcc-13 -pr:h gcc-13 --build=missing
 
+      - name: Install C++ tools
+        run: sudo apt-get install -y ninja-build
+
       - name: Build
         run: |
           cmake -S . -B ${{ github.workspace }}/build -G Ninja -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/build/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS:BOOL=OFF -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCONAN_IN_LOCAL_CACHE:BOOL=OFF
