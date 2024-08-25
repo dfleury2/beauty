@@ -187,19 +187,20 @@ server::enable_swagger(const char* swagger_entrypoint)
 
                 if (!route.route_info().route_parameters.empty()) {
                     description["parameters"] = boost::json::array();
+                    boost::json::array parameters;
                     for (const auto& param : route.route_info().route_parameters) {
-                        description["parameters"] = {
-                                        {"name",        param.name},
-                                        {"in",          param.in},
-                                        {"description", param.description},
-                                        {"required",    param.required},
-                                        {"schema", {
-                                                {"type", param.type},
-                                                {"format", param.format}
-                                            }
-                                        }
-                                };
+                        parameters.push_back(boost::json::object{
+                            {"name",        param.name},
+                            {"in",          param.in},
+                            {"description", param.description},
+                            {"required",    param.required},
+                            {"schema", {
+                                {"type", param.type},
+                                {"format", param.format}
+                            }}
+                        });
                     }
+                    description["parameters"] = std::move(parameters);
                 }
 
                 paths[swagger_path(route)].emplace_object()[to_lower(std::string(to_string(verb)))] = std::move(description);

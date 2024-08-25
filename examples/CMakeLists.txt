@@ -10,6 +10,7 @@ set(SOURCES
     beauty_server_attributes.cpp
     beauty_server_postpone.cpp
     beauty_server_singleton.cpp
+    beauty_server_swagger.cpp
     beauty_simple_server.cpp
     beauty_ws_client.cpp
     client_async.cpp
