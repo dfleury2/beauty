@@ -100,6 +100,8 @@ acceptor::on_accept(boost::system::error_code ec)
     if (ec) {
         fail(ec, "accept");
         _app.stop();
+        // Don't accept more connections if acceptor fails
+        return;
     }
     else {
         // Create the session SLL or not and run it
