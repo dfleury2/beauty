@@ -86,12 +86,20 @@ public:
 
     server& ws(const std::string& path, ws_handler&& handler);
 
+    // Address may be an ip address or a hostname such as localhost, in which case both IPv4 and
+    // IPv6 interfaces will be listened to. Empty string will listen on any address (0.0.0.0 on
+    // IPv4 and [::] on IPv6).
     void listen(int port = 0, const std::string& address = "0.0.0.0");
     void stop();
     void run();
     void wait();
 
-    const beauty::endpoint& endpoint() const { return _endpoint; }
+    const std::vector<beauty::endpoint>& endpoints() { return _endpoints; }
+
+    const beauty::endpoint& endpoint() const {
+        return _endpoints.empty() ? _empty_endpoint : _endpoints.front();
+    }
+
     int port() const { return endpoint().port(); }
 
     const beauty::router& router() const noexcept { return _router; }
@@ -105,9 +113,11 @@ private:
     beauty::application&    _app;
     int                     _concurrency{1};
     beauty::router          _router;
-    std::shared_ptr<beauty::acceptor> _acceptor;
+    // One acceptor for each resolved endpoint
+    std::vector<std::shared_ptr<beauty::acceptor>> _acceptors;
+    std::vector<beauty::endpoint>                  _endpoints;
+    beauty::endpoint        _empty_endpoint;
 
-    beauty::endpoint        _endpoint;
     beauty::server_info     _server_info;
 };
 

@@ -29,22 +29,53 @@ server::listen(int port, const std::string& address)
         _app.start(_concurrency);
     }
 
-    auto ip_address = asio::ip::make_address(address);
+    std::vector<std::string> resolve_addresses;
+    if (address.empty()) {
+        resolve_addresses = {"::", "0.0.0.0"};
+    } else {
+        resolve_addresses = {address};
+    }
 
-    _endpoint = beauty::endpoint{ip_address, (unsigned short)port};
+    // Two separate connections for both IPv4 and IPv6 are always created. On some operating
+    // systems depending on how the operating system is configured it's possible to open
+    // a single IPv6 socket and let it listen for IPv4 connections too. However, there is
+    // no way to query whether this behavior is enabled on runtime, so a IPv6-only sockets
+    // are forced instead (see acceptor::acceptor())
+    boost::asio::ip::tcp::resolver resolver{_app.ioc()};
+    for (const auto& resolve_address : resolve_addresses) {
+        boost::asio::ip::tcp::resolver::query query{resolve_address, std::to_string(port)};
 
-    // Create and launch a listening port
-    _acceptor = std::make_shared<beauty::acceptor>(_app, _endpoint, _router);
-    _acceptor->run();
+        // Resolving synchronously because errors should be propagated directly to
+        // the caller of listen()
+        auto resolved = resolver.resolve(query);
+
+        while (resolved != boost::asio::ip::tcp::resolver::iterator()) {
+            _endpoints.push_back(resolved->endpoint());
+            resolved++;
+        }
+    }
+
+    if (_endpoints.empty()) {
+        throw std::runtime_error("No endpoints to '" + address + "' resolved");
+    }
+
+    // Create and launch a listening ports
+    for (auto& endpoint : _endpoints) {
+        auto acceptor = std::make_shared<beauty::acceptor>(_app, endpoint, _router);
+        _acceptors.push_back(acceptor);
+        acceptor->run();
+    }
 }
 
 // --------------------------------------------------------------------------
 void
 server::stop()
 {
-    if (_acceptor) {
-        _acceptor->stop();
+    for (const auto& acceptor : _acceptors) {
+        acceptor->stop();
     }
+    _acceptors.clear();
+    _endpoints.clear();
     _app.stop();
 }
 
