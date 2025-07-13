@@ -10,8 +10,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Ninja
-        uses: seanmiddleditch/gha-setup-ninja@v4
+      - name: Install ninja
+        run: brew install ninja
 
       - name: Configure Python 3.10
         uses: actions/setup-python@v5
