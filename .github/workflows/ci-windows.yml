@@ -43,6 +43,6 @@ jobs:
 
       - name: Build
         run: |
-          cmake -S . -B ${{ github.workspace }}/build -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/build/conan_toolchain.cmake -DBUILD_SHARED_LIBS:BOOL=OFF -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_COMPILER=cl.exe -DCMAKE_C_COMPILER=cl.exe
+          cmake -S . -B ${{ github.workspace }}/build -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/conan_toolchain.cmake -DBUILD_SHARED_LIBS:BOOL=OFF -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_COMPILER=cl.exe -DCMAKE_C_COMPILER=cl.exe
           cmake --build ${{ github.workspace }}/build --config Release
 

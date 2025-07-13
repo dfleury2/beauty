@@ -43,5 +43,5 @@ jobs:
 
       - name: Build
         run: |
-          cmake -S . -B ${{ github.workspace }}/build -G Ninja -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/build/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS:BOOL=OFF
+          cmake -S . -B ${{ github.workspace }}/build -G Ninja -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS:BOOL=OFF
           cmake --build ${{ github.workspace }}/build
