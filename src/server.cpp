@@ -226,15 +226,15 @@ server::enable_swagger(const char* swagger_entrypoint)
 
         boost::json::object paths;
         for (const auto&[verb, routes] : _router) {
-            for (auto&& route : routes) {
+            for (const auto& route : routes) {
                 boost::json::object description = {
-                        {"description", route.route_info().description}
+                        {"description", route->route_info().description}
                 };
 
-                if (!route.route_info().route_parameters.empty()) {
+                if (!route->route_info().route_parameters.empty()) {
                     description["parameters"] = boost::json::array();
                     boost::json::array parameters;
-                    for (const auto& param : route.route_info().route_parameters) {
+                    for (const auto& param : route->route_info().route_parameters) {
                         parameters.push_back(boost::json::object{
                             {"name",        param.name},
                             {"in",          param.in},
@@ -249,7 +249,7 @@ server::enable_swagger(const char* swagger_entrypoint)
                     description["parameters"] = std::move(parameters);
                 }
 
-                paths[swagger_path(route)].emplace_object()[to_lower(std::string(to_string(verb)))] = std::move(description);
+                paths[swagger_path(*route)].emplace_object()[to_lower(std::string(to_string(verb)))] = std::move(description);
             }
         }
 

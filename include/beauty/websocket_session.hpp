@@ -9,7 +9,6 @@
 #include <boost/beast/websocket.hpp>
 #include <boost/asio.hpp>
 
-#include <iostream>
 #include <memory>
 #include <deque>
 
@@ -23,7 +22,7 @@ namespace beauty {
 // --------------------------------------------------------------------------
 class websocket_session : public std::enable_shared_from_this<websocket_session> {
 public:
-    explicit websocket_session(asio::ip::tcp::socket&& socket, const beauty::route& route) :
+    explicit websocket_session(asio::ip::tcp::socket&& socket, std::shared_ptr<beauty::route> route) :
             _websocket(std::move(socket)),
             _route(route)
     {}
@@ -31,7 +30,7 @@ public:
     ~websocket_session()
     {
         if (!_ws_context.uuid.empty()) {
-            _route.disconnect(_ws_context);
+            _route->disconnect(_ws_context);
         }
     }
 
@@ -40,7 +39,7 @@ public:
         _ws_context.remote_endpoint = _websocket.next_layer().socket().remote_endpoint();
         _ws_context.local_endpoint = _websocket.next_layer().socket().local_endpoint();
         _ws_context.target = std::string{req.target()};
-        _ws_context.route_path = _route.path();
+        _ws_context.route_path = _route->path();
         _ws_context.attributes = req.get_attributes();
 
         _websocket.set_option(
@@ -70,7 +69,7 @@ public:
 private:
     beast::websocket::stream<beast::tcp_stream> _websocket;
     beast::flat_buffer _buffer;
-    const beauty::route& _route;
+    std::shared_ptr<beauty::route> _route;
     ws_context  _ws_context;
 
     struct message {
@@ -91,7 +90,7 @@ private:
         _ws_context.uuid = make_uuid();
         //std::cout << "websocket_session: " << _ws_context.uuid << " - on accept" << std::endl;
 
-        _route.connect(_ws_context);
+        _route->connect(_ws_context);
 
         do_read();
     }
@@ -117,7 +116,7 @@ private:
             return fail(ec, "read");
         }
 
-        _route.receive(_ws_context, static_cast<const char*>(_buffer.cdata().data()), _buffer.size(), _websocket.got_text());
+        _route->receive(_ws_context, static_cast<const char*>(_buffer.cdata().data()), _buffer.size(), _websocket.got_text());
         _buffer.consume(_buffer.size());
 
         do_read();

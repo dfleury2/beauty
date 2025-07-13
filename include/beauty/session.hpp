@@ -239,7 +239,7 @@ private:
 
         // Try to match a route for this request target
         for(auto&& route : found_method->second) {
-            if (route.match(_request, _is_websocket)) {
+            if (route->match(_request, _is_websocket)) {
                 // Match will update parameters request from the URL
                 try {
                     if (_is_websocket) {
@@ -252,7 +252,7 @@ private:
                         res->set(beast::http::field::server, BEAUTY_PROJECT_VERSION);
                         res->keep_alive(_request.keep_alive());
 
-                        route.execute(_request, *res); // Call the route user handler
+                        route->execute(_request, *res); // Call the route user handler
 
                         return res;
                     }

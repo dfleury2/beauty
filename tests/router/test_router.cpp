@@ -7,9 +7,9 @@ namespace {
 auto route_matcher = [](const beauty::router& router, beauty::request& req) {
     for (const auto&[_, routes]: router) {
         for (const auto& r: routes) {
-            if (r.match(req)) {
+            if (r->match(req)) {
                 beauty::response res;
-                r.execute(req, res);
+                r->execute(req, res);
             }
         }
     }
