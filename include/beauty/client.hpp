@@ -39,7 +39,8 @@ public:
     using client_response = std::pair<boost::system::error_code, beauty::response>;
 
 public:
-    client() = default;
+    client();
+    client(beauty::application& app);
 #if BEAUTY_ENABLE_OPENSSL
     explicit client(certificates&& c);
 #endif
@@ -231,6 +232,7 @@ public:
     void ws_send(std::string&& data);
 
 private:
+    beauty::application& _app;
     url             _url;
 
     // Waiting for some improvements...no more double shared_ptr

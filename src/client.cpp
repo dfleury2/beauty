@@ -9,11 +9,20 @@
 
 namespace beauty
 {
+client::client() :
+        _app(beauty::application::Instance())
+{}
+
+// --------------------------------------------------------------------------
+client::client(beauty::application& app) :
+        _app(app)
+{}
+
 #if BEAUTY_ENABLE_OPENSSL
 // --------------------------------------------------------------------------
-client::client(certificates&& c)
+client::client(certificates&& c) :
+        _app(beauty::application::Instance(std::move(c)))
 {
-    beauty::application::Instance(std::move(c));
 }
 #endif
 
@@ -155,7 +164,7 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
         if (_url.is_https()) {
 #if BEAUTY_ENABLE_OPENSSL
             session_https = std::make_shared<session_client_https>(ioc,
-                    beauty::application::Instance().ssl_context());
+                    _app.ssl_context());
 
             session_https->run(std::move(req), _url, d);
 #else
@@ -195,8 +204,8 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
         const std::string& url, client_cb&& cb)
 {
     try {
-        if (!beauty::application::Instance().is_started()) {
-            beauty::application::Instance().start();
+        if (!_app.is_started()) {
+            _app.start();
         }
 
         _url = beauty::url(url);
@@ -206,8 +215,7 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
             if (!_session_https) {
                 // Create the session on first call...
                 _session_https = std::make_shared<session_client_https>(
-                        beauty::application::Instance().ioc(),
-                        beauty::application::Instance().ssl_context());
+                        _app.ioc(), _app.ssl_context());
             }
 
             _session_https->run(std::move(req), _url, d, std::move(cb));
@@ -219,7 +227,7 @@ client::send_request(beauty::request&& req, const beauty::duration& d,
             if (!_session_http) {
                 // Create the session on first call...
                 _session_http = std::make_shared<session_client_http>(
-                        beauty::application::Instance().ioc());
+                        _app.ioc());
             }
 
             _session_http->run(std::move(req), _url, d, std::move(cb));
@@ -249,14 +257,14 @@ void
 client::ws(const std::string& url, ws_handler&& handler)
 {
     try {
-        if (!beauty::application::Instance().is_started()) {
-            beauty::application::Instance().start();
+        if (!_app.is_started()) {
+            _app.start();
         }
 
         if (!_session_http) {
             // Create the session on first call...
             _websocket_client = std::make_shared<websocket_client>(
-                    beauty::application::Instance().ioc(),
+                    _app.ioc(),
                     beauty::url(url),
                     std::move(handler));
         }
