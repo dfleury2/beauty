@@ -218,7 +218,7 @@ public:
     }
 
     // Low level send request
-    static client_response
+    client_response
     send_request(beauty::request&& req, const beauty::duration& d, const std::string& url);
 
     void
