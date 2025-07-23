@@ -1,6 +1,7 @@
 set(SOURCES
     beauty_application.cpp
     beauty_application_singleton.cpp
+    beauty_health_check_server.cpp
     beauty_benchmark.cpp
     beauty_chat.cpp
     beauty_client_async.cpp
