@@ -12,7 +12,7 @@ namespace beauty
 // --------------------------------------------------------------------------
 class BEAUTY_EXPORT router {
 public:
-    using routes = std::unordered_map<beast::http::verb, std::vector<route>>;
+    using routes = std::unordered_map<beast::http::verb, std::vector<std::shared_ptr<route>>>;
 
     void add_route(beast::http::verb v, route&& r);
 
