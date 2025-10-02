@@ -138,9 +138,7 @@ install(
     DESTINATION include
 )
 
-if(UNIX)
-  include(GNUInstallDirs)
-endif()
+include(GNUInstallDirs)
 
 install(TARGETS beauty
     EXPORT BeautyConfig
