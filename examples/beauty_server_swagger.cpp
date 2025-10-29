@@ -1,6 +1,10 @@
 #include <beauty/beauty.hpp>
 
+#include <boost/json/object.hpp>
 #include <iostream>
+
+#include <boost/json.hpp>
+
 
 #include "read_file_content.hpp"
 
@@ -69,9 +73,40 @@ int main(int argc, char* argv[])
         {
             {"a", "path", "The first number to add.", "string", "", true},
             {"b", "path", "The second number to add.", "string", "", true}
+        },
+        .tags = { "Math"}
+    };
+
+    server.get("/add/:a/:b", param_info, [](const beauty::request& req, beauty::response& res) {
+        auto a = req.a("a").as_integer(0);
+        auto b = req.a("b").as_integer(0);
+        res.body() = "Sum: " + std::to_string(a + b);
+        res.set(beauty::http::field::content_type, "text/plain");
+    });
+
+    beauty::route_info param_info_with_body = {
+        .description = "Example of the body definition with multiple schemas for post endpoint",
+        .route_parameters = {},
+        .tags = { "post" },
+        .body = beauty::request_body {
+            .required = true,
+            .body_schemas = {
+                beauty::body_schema {
+                    .schema_name = "text/plain",
+                    .schema = boost::json::object{ {"type", "string"}}
+                },
+                beauty::body_schema{
+                    .schema_name = "application/json",
+                    .schema = boost::json::object{ 
+                        { "type", "object"}, 
+                        { "properties", boost::json::object{ 
+                            { "value", boost::json::object{ 
+                                {"type", "string"}}}}}}}
+            }
         }
     };
-    server.get("/add/:a/:b", param_info, [](const beauty::request& req, beauty::response& res) {
+
+    server.post("/post_with_body", param_info_with_body, [](const beauty::request& req, beauty::response& res) {
         auto a = req.a("a").as_integer(0);
         auto b = req.a("b").as_integer(0);
         res.body() = "Sum: " + std::to_string(a + b);

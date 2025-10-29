@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 
+#include <optional>
+#include <boost/json.hpp>
+
 namespace beauty
 {
 class route;
@@ -27,9 +30,24 @@ struct route_parameter {
 };
 
 // --------------------------------------------------------------------------
+struct body_schema {
+    std::string schema_name; // "text/plain", "application/json", etc. check openapi documentation for all the supported schemas
+    boost::json::object schema;
+};
+
+// --------------------------------------------------------------------------
+struct request_body {
+    bool required = false;
+    std::vector<body_schema> body_schemas;
+};
+
+
+// --------------------------------------------------------------------------
 struct route_info {
     std::string description;
     std::vector<route_parameter> route_parameters;
+    std::vector<std::string> tags;
+    request_body body;
 };
 
 // --------------------------------------------------------------------------

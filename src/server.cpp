@@ -249,6 +249,27 @@ server::enable_swagger(const char* swagger_entrypoint)
                     description["parameters"] = std::move(parameters);
                 }
 
+                if (!route.route_info().tags.empty()) {
+                    boost::json::array tags;
+                    for (const auto& tag: route.route_info().tags) {
+                        tags.push_back(boost::json::string(tag));
+                    }
+
+                    description["tags"] = tags; 
+                }
+
+                if (!route.route_info().body.body_schemas.empty()) {
+                    boost::json::object schemas;
+                    for (const auto& schema : route.route_info().body.body_schemas) {
+                        schemas[schema.schema_name] = boost::json::object{
+                            { "schema", schema.schema }
+                        };
+                    }
+                    description["requestBody"] = boost::json::object{
+                        {"required", route.route_info().body.required },
+                        {"content", std::move(schemas) }
+                    };
+                }                
                 paths[swagger_path(route)].emplace_object()[to_lower(std::string(to_string(verb)))] = std::move(description);
             }
         }

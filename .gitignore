@@ -6,3 +6,7 @@ CMakeUserPresets.json
 venv
 graph_info.json
 conanbuildinfo.txt
+*.o
+*.a
+conan.lock
+conaninfo.txt

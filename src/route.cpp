@@ -62,6 +62,8 @@ route::update_route_info(const beauty::route_info& route_info)
 {
     _route_info.description = route_info.description;
 
+    _route_info.body = route_info.body;
+    _route_info.tags = route_info.tags;
     for (const auto& param: route_info.route_parameters) {
         if (auto found = std::find_if(begin(_route_info.route_parameters),
                     end(_route_info.route_parameters),
