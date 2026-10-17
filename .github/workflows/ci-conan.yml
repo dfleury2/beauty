@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        conan_version: [1.64.1, 2.4.1]
+        conan_version: [1.64.1, 2.33.0]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,7 +38,7 @@ jobs:
         run: conan profile new --detect --force gcc-13
 
       - name: Detect Conan 2.x profile
-        if: matrix.conan_version == '2.4.1'
+        if: matrix.conan_version == '2.33.0'
         run: conan profile detect --force --name=gcc-13
 
       - name: Build Conan package
