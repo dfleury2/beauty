@@ -354,9 +354,9 @@ automatically for VS2022.
 ```shell
 git clone https://github.com/dfleury2/beauty.git
 cd beauty
-conan install . -o "beauty/*:openssl=False" -o "beauty/*:shared=False"-pr vs2022 -b missing -of build
+conan install . -o "beauty/*:openssl=False" -o "beauty/*:shared=False" -pr vs2022 -b missing -of build
 cmake -S . -B build --preset conan-default
-cmake --build build --config Release
+cmake --build build --config Release --parallel
 ```
 
 The binaries will be created in the `build\examples\Release` directory.
@@ -366,9 +366,9 @@ For a Full dynamic compilation without SSL:
 ```shell
 git clone https://github.com/dfleury2/beauty.git
 cd beauty
-conan install . -o "beauty/*:openssl=False" -o "*:shared=True"-pr vs2022 -b missing -of build
+conan install . -o "beauty/*:openssl=False" -o "*:shared=True" -pr vs2022 -b missing -of build
 cmake -S . -B build --preset conan-default
-cmake --build build --config Release
+cmake --build build --config Release --parallel
 ```
 
 To be improved...
