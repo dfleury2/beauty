@@ -12,6 +12,7 @@
 #include <iostream>
 #include <memory>
 #include <deque>
+#include <mutex>
 
 namespace asio = boost::asio;
 namespace beast = boost::beast;
@@ -79,6 +80,10 @@ private:
     };
 
     std::deque<message> _queue;
+    // The session runs on a plain (multi-threaded) io_context executor: posted
+    // do_write calls and on_write completions can interleave on different
+    // threads, so every access to _queue and the write chain is serialized.
+    std::mutex _write_mutex;
 
 private:
     void on_accept(beast::error_code ec)
@@ -125,6 +130,7 @@ private:
 
     void do_write(std::string&& str, bool binary_mode)
     {
+        std::lock_guard<std::mutex> lock(_write_mutex);
         message msg;
         msg.buffer = std::move(str);
         msg.binary_mode = binary_mode;
@@ -147,6 +153,7 @@ private:
 
     void on_write(beast::error_code ec, std::size_t)
     {
+        std::lock_guard<std::mutex> lock(_write_mutex);
         //std::cout << "websocket_session: " << _ws_context.uuid << " - on write" << std::endl;
         if (ec) {
             return fail(ec, "write");
