@@ -276,6 +276,15 @@ main(int argc, char* argv[])
 
 Further examples can be found into the binaries directory at the root of the project.
 
+## Support
+
+The library is free, open source and has no ads, But I need some resources to maintain it.
+
+So, if you find it useful, you can [support me on Ko-fi](https://ko-fi.com/simplecpp) ❤️
+
+[![Support me on Ko-fi](https://img.shields.io/badge/Ko--fi-support%20me-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/simplecpp)
+
+
 ## Build
 
 Beauty depends Boost.Beast and OpenSsl. You can rely on Conan 2.x to get the package or
