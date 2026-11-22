@@ -8,7 +8,6 @@
 #include <boost/beast/http.hpp>
 
 #include <iostream>
-#include <regex>
 #include <random>
 
 namespace http = boost::beast::http;
@@ -37,9 +36,17 @@ split(const T& str, char sep)
 }
 
 inline
-unsigned char
+int
 hexdigit_to_num(unsigned char c)
-{ return (c < 'A' ? c - '0' : toupper(c) - 'A' + 10); }
+{
+    if (c >= '0' && c <= '9')
+        return c - '0';
+    if (c >= 'A' && c <= 'F')
+        return c - 'A' + 10;
+    if (c >= 'a' && c <= 'f')
+        return c - 'a' + 10;
+    return -1;
+}
 
 }
 
@@ -106,30 +113,19 @@ split(const std::string_view& str_view, char sep)
 std::string
 escape(const std::string& s)
 {
-    static const char* dec2hex = "0123456789ABCDEF";
-    static std::regex unsafe("[^A-Za-z0-9\\-\\._~]");
-
+    static constexpr char dec2hex[] = "0123456789ABCDEF";
     std::string escaped;
-    auto cur = std::sregex_token_iterator(s.begin(), s.end(), unsafe);
-    auto end = std::sregex_token_iterator();
-    auto vbegin = s.begin();
-
-    for ( ; cur != end; ++cur) {
-        // Append valid chars
-        escaped.append(vbegin, cur->first);
-
-        for (auto it = cur->first; it != cur->second; ++it) {
-            auto c = (unsigned char) ::toupper(*it);
-
+    escaped.reserve(s.size());
+    for (unsigned char c : s) {
+        if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
+            (c >= '0' && c <= '9') || c == '-' || c == '.' || c == '_' || c == '~') {
+            escaped += static_cast<char>(c);
+        } else {
             escaped += '%';
             escaped += dec2hex[c >> 4];
             escaped += dec2hex[c & 0x0F];
         }
-
-        vbegin = cur->second;
     }
-
-    escaped.append(vbegin, s.end());
 
     return escaped;
 }
@@ -138,36 +134,21 @@ escape(const std::string& s)
 std::string
 unescape(const std::string& s)
 {
-    static std::regex escaped("%([0-9A-Fa-f]{2})");
-
-    // Support urlencoded '+' --> ' '
-    std::string t = std::regex_replace(s,
-                                       std::regex("\\+"),
-                                       " ");
-
     std::string unescaped;
-    auto cur = std::sregex_token_iterator(t.begin(), t.end(), escaped);
-    auto end = std::sregex_token_iterator();
-    auto vbegin = t.cbegin();
-
-    for ( ; cur != end; ++cur) {
-        auto it = cur->first;
-
-        // Append unescaped chars
-        unescaped.append(vbegin, it);
-
-        // Skip percent
-        ++it;
-
-        auto c = hexdigit_to_num(*it++) << 4;
-        c |= hexdigit_to_num(*it++);
-
-        unescaped += c;
-
-        vbegin = cur->second;
+    unescaped.reserve(s.size());
+    for (size_t i = 0; i < s.size(); ++i) {
+        const char c = s[i];
+        if (c == '%' && s.size() - i >= 3) {
+            const int high = hexdigit_to_num(s[i + 1]);
+            const int low = hexdigit_to_num(s[i + 2]);
+            if (high >= 0 && low >= 0) {
+                unescaped += static_cast<char>((high << 4) | low);
+                i += 2;
+                continue;
+            }
+        }
+        unescaped += (c == '+' ? ' ' : c);
     }
-
-    unescaped.append(vbegin, t.cend());
 
     return unescaped;
 }
