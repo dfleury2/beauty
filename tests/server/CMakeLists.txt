@@ -2,6 +2,7 @@ add_test_executable(
     TEST_NAME server
     SOURCES
         test_long_transaction.cpp
+        test_reset_client.cpp
         test_server.cpp
     INCLUDES
         ../include

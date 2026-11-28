@@ -4,6 +4,8 @@
 #include <beauty/server.hpp>
 #include <beauty/version.hpp>
 
+#include <thread>
+
 // --------------------------------------------------------------------------
 TEST_CASE("Start and stop")
 {
@@ -37,7 +39,7 @@ TEST_CASE("Start and stop - external context")
     beauty::application app(ioc);
     beauty::server server(app);
 
-    std::thread([&ioc] { ioc.run(); }).detach();
+    std::thread runner([&ioc] { ioc.run(); });
 
     app.start();
 
@@ -47,6 +49,9 @@ TEST_CASE("Start and stop - external context")
 
     app.stop();
     ioc.stop();
+
+    // Do not leave the thread running on the ioc destroyed at scope exit
+    runner.join();
 }
 
 // --------------------------------------------------------------------------
@@ -59,7 +64,7 @@ TEST_CASE("Start and stop with acceptor failure - external context")
     beauty::server server1(app);
     beauty::server server2(app);
 
-    std::thread([&ioc] { ioc.run(); }).detach();
+    std::thread runner([&ioc] { ioc.run(); });
 
     app.start();
 
@@ -78,6 +83,9 @@ TEST_CASE("Start and stop with acceptor failure - external context")
 
     app.stop();
     ioc.stop();
+
+    // Do not leave the thread running on the ioc destroyed at scope exit
+    runner.join();
 }
 
 // --------------------------------------------------------------------------

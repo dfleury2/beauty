@@ -227,7 +227,17 @@ private:
     {
         // Make sure we can handle the method
         _request = _request_parser->release();
-        _request.remote(_socket.remote_endpoint());
+
+        // The peer may have reset the connection after sending its request:
+        // use the non-throwing overload, an exception here would escape
+        // from io_context::run()
+        boost::system::error_code ec;
+        auto remote_ep = _socket.remote_endpoint(ec);
+        if (ec) {
+            fail(ec, "remote_endpoint");
+            return nullptr; // No response, the session ends
+        }
+        _request.remote(std::move(remote_ep));
 
         _is_websocket = (beast::websocket::is_upgrade(_request));
         //std::cout << "session: handle " << (_is_websocket ? "websocket" : "request") << ", method: " << _request.method_string() << ", target: " << _request.target() << std::endl;

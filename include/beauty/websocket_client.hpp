@@ -81,8 +81,14 @@ private:
         }
 
         //_ws_context.ws_session = shared_from_this();
-        _ws_context.remote_endpoint = _websocket.next_layer().socket().remote_endpoint();
-        _ws_context.local_endpoint = _websocket.next_layer().socket().local_endpoint();
+        // The peer may already have reset the connection: do not throw
+        _ws_context.remote_endpoint = _websocket.next_layer().socket().remote_endpoint(ec);
+        if (!ec) {
+            _ws_context.local_endpoint = _websocket.next_layer().socket().local_endpoint(ec);
+        }
+        if (ec) {
+            return fail(ec, "endpoint");
+        }
         _ws_context.uuid = make_uuid();
         _ws_context.target = _url.path();
         _ws_context.route_path = _url.path();

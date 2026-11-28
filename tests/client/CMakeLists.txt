@@ -6,6 +6,7 @@ add_test_executable(
         test_client.cpp
         test_client_disconnected.cpp
         test_client_swagger.cpp
+        test_ws_client_reset.cpp
     INCLUDES
         ../include
     LIBRARIES
